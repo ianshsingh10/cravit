@@ -1,21 +1,23 @@
 import dbConnect from "@/lib/dbConnect";
+import OTP from "@/models/otp";
 import User from "@/models/user";
+import { sendEmailOtp } from "@/lib/sendEmailOTP";
 
 export async function POST(req) {
-  const { phoneNo, name } = await req.json();
-  if (!phoneNo || !name) return Response.json({ error: "Missing phone or name" }, { status: 400 });
+  const { name, phoneNo, email } = await req.json();
+  if (!name || !phoneNo || !email) {
+    return Response.json({ error: "All fields required" }, { status: 400 });
+  }
 
   await dbConnect();
 
-  const existing = await User.findOne({ phoneNo });
-  if (existing) return Response.json({ error: "User already exists" }, { status: 409 });
+  const existing = await User.findOne({ email });
+  if (existing) return Response.json({ error: "Email already registered" }, { status: 409 });
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+  await OTP.findOneAndUpdate({ email }, { code: otp, createdAt: new Date() }, { upsert: true });
 
-  await User.create({ phoneNo, name, otp, otpExpiry });
-
-  console.log(`Register OTP for ${phoneNo} is ${otp} expires in ${otpExpiry}`);
+  await sendEmailOtp(email, otp);
 
   return Response.json({ message: "OTP sent" });
 }
