@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import {
-  LogIn,
-  LogOut,
-} from "lucide-react";
+import { LogIn, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 // --- UPDATED DYNAMIC HEADER COMPONENT ---
@@ -97,6 +94,20 @@ export default function DynamicHeader() {
                     </p>
                     <p className="truncate text-gray-500">{user.email}</p>
                   </div>
+
+                  {/* Show dashboard if user is seller */}
+                  {user.role === "seller" && (
+                    <button
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        router.push("/seller/dashboard");
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-100 flex items-center gap-2"
+                    >
+                      🧰 Dashboard
+                    </button>
+                  )}
+
                   <button
                     onClick={handleSignOut}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
@@ -144,4 +155,4 @@ export default function DynamicHeader() {
       </div>
     </header>
   );
-};
+}

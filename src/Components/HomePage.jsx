@@ -8,8 +8,10 @@ import TestimonialsSection from "@/Components/ui/TestimonialsSection";
 export default function HomePage() {
   return (
     <>
+    {/* Navbar Section */}
     <DynamicHeader />
       <main>
+        {/* Hero Section */}
         <HeroSection/>
         {/* Features Section */}
         <FeaturedSection/>
@@ -18,6 +20,7 @@ export default function HomePage() {
         {/* Testimonials Section */}
         <TestimonialsSection/>
       </main>
+      {/* Footer Section */}
       <HomeFooter/>
     </>
   );

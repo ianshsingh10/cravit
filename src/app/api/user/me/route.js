@@ -22,14 +22,14 @@ export async function GET(req) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // 3. Find the user in the database
-    const user = await User.findById(decoded.id).select("email name");
+    const user = await User.findById(decoded.id).select("_id email name role");
 
     if (!user) {
       return Response.json({ user: null }, { status: 404 });
     }
-
+    
     // 4. Return the user's data
-    return Response.json({ user: { email: user.email, name: user.name } }, { status: 200 });
+    return Response.json({ user: {id: user._id.toString(), email: user.email, name: user.name, role: user.role } }, { status: 200 });
   } catch (error) {
     // If token is invalid or expired
     return Response.json({ user: null }, { status: 401 });
