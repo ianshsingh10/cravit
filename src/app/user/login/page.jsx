@@ -63,13 +63,13 @@ export default function LoginPage() {
         body: JSON.stringify({ email, otp }),
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        setMsg("Login successful! Redirecting...");
-        router.push("/");
-      } else {
-        setError(data.error || "Invalid OTP. Please try again.");
-      }
+        const data = await res.json();
+        if (res.ok) {
+            setMsg("Login successful! Redirecting...");
+        window.location.href = "/";
+        } else {
+            setError(data.error || "Invalid OTP. Please try again.");
+        }
     } catch (err) {
       setError("An unexpected error occurred.");
     } finally {
@@ -100,16 +100,9 @@ export default function LoginPage() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4">
+    <div className="bg-gray-50 flex flex-col justify-center items-center p-4 md:p-20">
       <div className="max-w-md w-full mx-auto bg-white p-8 rounded-2xl shadow-lg">
         <div className="text-center mb-8">
-          <Image
-            src="/cravit-logo.jpg" // Ensure your logo is in the `public` folder
-            alt="craVIT Logo"
-            width={100}
-            height={100}
-            className="mx-auto rounded-full"
-          />
           <h2 className="text-2xl font-bold text-gray-800 mt-4">Welcome Back!</h2>
           <p className="text-gray-500">Login to continue your foodie journey.</p>
         </div>
@@ -133,8 +126,8 @@ export default function LoginPage() {
               Enter the 6-digit code sent to your email.
             </p>
             <div className="relative">
-              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <input type="text" placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} maxLength="6" className="text-black pl-10 border border-gray-300 p-3 rounded-lg w-full text-center tracking-[0.5em] focus:ring-2 focus:ring-orange-400 focus:border-transparent transition" required />
+                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input type="text" placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} maxLength="6" className="text-black pl-2 border border-gray-300 p-3 rounded-lg w-full text-center tracking-[0.5em] focus:ring-2 focus:ring-orange-400 focus:border-transparent transition" required/>
             </div>
             <button type="submit" disabled={isLoading} className="bg-green-500 text-white font-bold px-4 py-3 rounded-lg w-full hover:bg-green-600 transition-colors duration-300 disabled:bg-green-300">
               {isLoading ? "Verifying..." : "Verify & Login"}

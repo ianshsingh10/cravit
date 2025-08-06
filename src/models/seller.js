@@ -8,4 +8,4 @@ const sellerSchema = new mongoose.Schema({
   items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Item' }]
 });
 
-module.exports = mongoose.model('Seller', sellerSchema);
+export default mongoose.models.Seller || mongoose.model("Seller", sellerSchema);

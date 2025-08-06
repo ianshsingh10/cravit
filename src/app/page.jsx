@@ -1,10 +1,23 @@
 "use client";
-import HomePage from "@/Components/HomePage";
+import HeroSection from "@/Components/ui/HeroSection";
+import FeaturedSection from "@/Components/ui/FeaturedSection";
+import OutletSection from "@/Components/ui/OutletSection";
+import TestimonialsSection from "@/Components/ui/TestimonialsSection";
 
-export default function CraVitLandingPage() {
+export default function HomePage() {
   return (
-    <div className="bg-gray-50 font-sans text-gray-800">
-      <HomePage/>
-    </div>
+    <>
+      <main>
+        {/* Hero Section */}
+        <HeroSection/>
+        {/* Features Section */}
+        <FeaturedSection/>
+        {/* Participating Outlets Section */}
+        <OutletSection/>
+        {/* Testimonials Section */}
+        <TestimonialsSection/>
+      </main>
+      
+    </>
   );
 }
