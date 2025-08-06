@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from 'next/image';
 import { Mail, KeyRound } from 'lucide-react';
 
+
 export default function LoginPage() {
   const [step, setStep] = useState("enter"); // "enter" or "verify"
   const [email, setEmail] = useState("");
@@ -124,7 +125,7 @@ export default function LoginPage() {
          <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
                 Don't have an account?{" "}
-                <a href="/register" className="font-semibold text-orange-500 hover:underline">
+                <a href="/user/register" className="font-semibold text-orange-500 hover:underline">
                     Register here
                 </a>
             </p>
