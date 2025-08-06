@@ -63,7 +63,7 @@ export default function RegisterPage() {
       const data = await res.json();
       if (res.ok) {
         setMsg("Registration successful! Redirecting...");
-        router.push("/"); // Redirect to homepage on success
+        window.location.href = "/";
       } else {
         setError(data.error || "Invalid OTP. Please try again.");
       }

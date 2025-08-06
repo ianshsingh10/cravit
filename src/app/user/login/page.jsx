@@ -64,7 +64,7 @@ export default function LoginPage() {
         const data = await res.json();
         if (res.ok) {
             setMsg("Login successful! Redirecting...");
-            router.push("/");
+        window.location.href = "/";
         } else {
             setError(data.error || "Invalid OTP. Please try again.");
         }
