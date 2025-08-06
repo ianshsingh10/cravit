@@ -1,8 +1,8 @@
 "use client";
-import HeroSection from "@/components/ui/HeroSection";
-import FeaturedSection from "@/components/ui/FeaturedSection";
-import OutletSection from "@/components/ui/OutletSection";
-import TestimonialsSection from "@/components/ui/TestimonialsSection";
+import HeroSection from "@/Components/ui/HeroSection";
+import FeaturedSection from "@/Components/ui/FeaturedSection";
+import OutletSection from "@/Components/ui/OutletSection";
+import TestimonialsSection from "@/Components/ui/TestimonialsSection";
 
 export default function HomePage() {
   return (
