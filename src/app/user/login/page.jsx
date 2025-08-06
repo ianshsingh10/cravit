@@ -76,16 +76,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4">
+    <div className="bg-gray-50 flex flex-col justify-center items-center p-4 md:p-20">
       <div className="max-w-md w-full mx-auto bg-white p-8 rounded-2xl shadow-lg">
         <div className="text-center mb-8">
-            <Image
-              src="/cravit-logo.jpg" // Ensure your logo is in the `public` folder
-              alt="craVIT Logo"
-              width={100}
-              height={100}
-              className="mx-auto rounded-full"
-            />
           <h2 className="text-2xl font-bold text-gray-800 mt-4">Welcome Back!</h2>
           <p className="text-gray-500">Login to continue your foodie journey.</p>
         </div>

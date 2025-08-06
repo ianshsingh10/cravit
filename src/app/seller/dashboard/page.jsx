@@ -132,7 +132,7 @@ export default function SellerDashboard() {
     return (
         <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
             <div className="max-w-6xl mx-auto">
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex flex-col md:flex-row gap-4 md:gap-0 justify-between items-center mb-8">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-800">Manage Your Items</h1>
                         <p className="text-gray-500 mt-1">Add, edit, or remove your menu items here.</p>
@@ -151,7 +151,7 @@ export default function SellerDashboard() {
                          {[...Array(4)].map((_, i) => <ItemCardSkeleton key={i} />)}
                     </div>
                 ) : items.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <div className="max-w-4xl grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {items.map(item => (
                             <ItemCard key={item._id} item={item} onEdit={handleOpenEditModal} onDelete={handleOpenDeleteModal} />
                         ))}
