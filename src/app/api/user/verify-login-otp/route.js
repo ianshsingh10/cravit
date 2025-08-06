@@ -16,7 +16,8 @@ export async function POST(req) {
   if (!user) return Response.json({ error: "User not found" }, { status: 404 });
 
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-  await cookies().set("token", token, { httpOnly: true, path: "/", maxAge: 86400 });
+  const cookieStore = await cookies();
+  cookieStore.set("token", token, { httpOnly: true, path: "/", maxAge: 86400 });
 
   await OTP.deleteOne({ email });
 

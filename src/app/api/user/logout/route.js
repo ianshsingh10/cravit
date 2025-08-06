@@ -1,13 +1,21 @@
-// File path: /app/api/user/logout/route.js
-
+// File: app/api/user/logout/route.js
 import { cookies } from "next/headers";
 
-export async function POST(req) {
+export async function POST() {
   try {
-    // To log out, we set the cookie's expiration date to the past
-    cookies().set("token", "", { httpOnly: true, path: "/", maxAge: -1 });
+    const cookieStore = await cookies();
+
+    cookieStore.set({
+      name: "token",
+      value: "",
+      path: "/",
+      httpOnly: true,
+      maxAge: 0,
+    });
+
     return Response.json({ message: "Logged out successfully" }, { status: 200 });
   } catch (error) {
+    console.error("Logout error:", error);
     return Response.json({ error: "Logout failed" }, { status: 500 });
   }
 }

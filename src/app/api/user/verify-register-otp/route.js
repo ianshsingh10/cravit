@@ -23,7 +23,8 @@ export async function POST(req) {
   }
 
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-  cookies().set("token", token, { httpOnly: true, path: "/", maxAge: 86400 });
+  const cookieStore = await cookies();
+  cookieStore.set("token", token, { httpOnly: true, path: "/", maxAge: 86400 });
 
   await OTP.deleteOne({ email });
 
