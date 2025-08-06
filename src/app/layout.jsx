@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import DynamicHeader from "@/components/Navbar";
-import HomeFooter from "@/components/Footer";
+import DynamicHeader from "@/Components/Navbar";
+import HomeFooter from "@/Components/Footer";
 import "./globals.css";
 
 
