@@ -169,9 +169,7 @@ const DynamicHeader = () => {
             <div className="h-10 w-24 bg-gray-200 rounded-full animate-pulse"></div>
           ) : user ? (
             // --- Logged-in View ---
-            <div
-              className="relative"
-            >
+            <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!isDropdownOpen)}
                 className="w-11 h-11 bg-orange-500 text-white flex items-center justify-center rounded-full font-bold text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
@@ -202,13 +200,13 @@ const DynamicHeader = () => {
             <>
               <div className="hidden sm:flex items-center gap-4">
                 <a
-                  href="/login"
+                  href="/user/login"
                   className="text-gray-600 font-semibold hover:text-orange-500 transition-colors"
                 >
                   Login
                 </a>
                 <a
-                  href="/register"
+                  href="/user/register"
                   className="bg-orange-500 text-white font-bold py-2 px-4 rounded-full hover:bg-orange-600 transition-colors duration-300"
                 >
                   Register
@@ -216,13 +214,13 @@ const DynamicHeader = () => {
               </div>
               <div className="sm:hidden flex items-center gap-2">
                 <a
-                  href="/login"
+                  href="/user/login"
                   className="text-gray-600 p-2 rounded-full hover:bg-gray-100"
                 >
                   <LogIn size={22} />
                 </a>
                 <a
-                  href="/register"
+                  href="/user/register"
                   className="bg-orange-500 text-white font-bold py-2 px-3 rounded-full text-sm"
                 >
                   Register
@@ -401,21 +399,17 @@ export default function CraVitLandingPage() {
                 height={40}
                 className="mb-4 mx-auto md:mx-0"
               />
-              <p className="text-gray-400">
-                The easiest way to discover and enjoy food at VIT. Join our
-                community and never miss out!
-              </p>
             </div>
             <div>
               <h3 className="font-bold text-lg mb-4">Contact Us</h3>
               <ul className="space-y-2 text-gray-400">
                 <li className="flex items-center justify-center md:justify-start gap-2 hover:text-white transition-colors">
                   <Mail size={16} />
-                  <a href="mailto:sp.cravit@gmail.com">support@cravit.com</a>
+                  <a href="mailto:sp.cravit@gmail.com">sp.cravit@gmail.com</a>
                 </li>
                 <li className="flex items-center justify-center md:justify-start gap-2 hover:text-white transition-colors">
                   <Phone size={16} />
-                  <a href="tel:+911234567890">+91 123 456 7890</a>
+                  <a href="tel:+919555751574">+91 955557 51574</a>
                 </li>
               </ul>
             </div>
@@ -443,7 +437,12 @@ export default function CraVitLandingPage() {
               </div>
             </div>
           </div>
-          <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
+
+          <p className="text-gray-400 text-center">
+            The easiest way to discover and enjoy food at VIT. Join our
+            community and never miss out!
+          </p>
+          <div className="mt-3 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
             <p>
               &copy; {new Date().getFullYear()} craVIT. All Rights Reserved.
             </p>
