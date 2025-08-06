@@ -78,11 +78,9 @@ export default function DynamicHeader() {
           {isLoading ? (
             <div className="h-10 w-24 bg-gray-200 rounded-full animate-pulse"></div>
           ) : user ? (
-            // --- Logged-in View ---
             <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!isDropdownOpen)}
-                onBlur={() => setTimeout(() => setDropdownOpen(false), 150)}
                 className="cursor-pointer w-11 h-11 bg-orange-500 text-white flex items-center justify-center rounded-full font-bold text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
               >
                 {getInitials(user.email)}
@@ -105,7 +103,6 @@ export default function DynamicHeader() {
                     Dashboard
                   </button>
                   
-                  {/* --- NEW: Edit Profile Button --- */}
                   <button
                     onClick={() => {
                       setDropdownOpen(false);

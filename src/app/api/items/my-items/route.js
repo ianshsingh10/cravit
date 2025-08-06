@@ -11,16 +11,16 @@ export async function GET(req) {
   await dbConnect();
 
   try {
-    // 1. Verify the user's session from the token
-    const token = await cookies().get("token")?.value;
+    const cookie= await cookies();
+
+    const token =  cookie.get("token")?.value;
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
-
-    // 2. Find the user and check if they are a seller
+    
     const user = await User.findById(userId);
     if (!user || user.role !== 'seller') {
         return NextResponse.json({ error: "Access Denied" }, { status: 403 });
