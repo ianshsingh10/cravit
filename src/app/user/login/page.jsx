@@ -110,7 +110,7 @@ export default function LoginPage() {
             </p>
             <div className="relative">
                 <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input type="text" placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} maxLength="6" className="text-black pl-10 border border-gray-300 p-3 rounded-lg w-full text-center tracking-[0.5em] focus:ring-2 focus:ring-orange-400 focus:border-transparent transition" required/>
+                <input type="text" placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} maxLength="6" className="text-black pl-2 border border-gray-300 p-3 rounded-lg w-full text-center tracking-[0.5em] focus:ring-2 focus:ring-orange-400 focus:border-transparent transition" required/>
             </div>
             <button type="submit" disabled={isLoading} className="bg-green-500 text-white font-bold px-4 py-3 rounded-lg w-full hover:bg-green-600 transition-colors duration-300 disabled:bg-green-300">
               {isLoading ? "Verifying..." : "Verify & Login"}

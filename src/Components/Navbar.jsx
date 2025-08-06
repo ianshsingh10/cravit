@@ -1,9 +1,11 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { LogIn, LogOut } from "lucide-react";
+import Link from 'next/link';
+import { LogIn, LogOut, LayoutDashboard, UserCog } from "lucide-react"; // Import UserCog icon
 import { useRouter } from "next/navigation";
 
-// --- UPDATED DYNAMIC HEADER COMPONENT ---
 export default function DynamicHeader() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,7 +19,7 @@ export default function DynamicHeader() {
         const res = await fetch("/api/user/me");
         if (res.ok) {
           const data = await res.json();
-          setUser(data.user); // Set user to null if not found
+          setUser(data.user);
         } else {
           setUser(null);
         }
@@ -33,24 +35,23 @@ export default function DynamicHeader() {
   }, []);
 
   const handleSignOut = async () => {
-    console.log("Signout function triggered"); // ✅ Debug log
     try {
-      const res = await fetch("/api/user/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (res.ok) {
-        console.log("Logout successful"); // ✅ Debug log
-        setUser(null);
-        window.location.href = "/";
-      } else {
-        console.error("Logout failed");
-      }
+      await fetch("/api/user/logout", { method: "POST" });
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
+      setUser(null);
       setDropdownOpen(false);
+      window.location.href = "/";
+    }
+  };
+
+  const handleDashboardClick = () => {
+    setDropdownOpen(false);
+    if (user?.role === 'seller') {
+      router.push("/seller/dashboard");
+    } else {
+      router.push("/user/dashboard");
     }
   };
 
@@ -63,7 +64,7 @@ export default function DynamicHeader() {
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-3 min-h-[84px]">
-          <a href="/" aria-label="Home">
+          <Link href="/" aria-label="Home">
             <Image
               src="/cravit-logo.jpg"
               alt="craVIT Logo"
@@ -72,7 +73,7 @@ export default function DynamicHeader() {
               className="rounded-full"
               priority
             />
-          </a>
+          </Link>
 
           {isLoading ? (
             <div className="h-10 w-24 bg-gray-200 rounded-full animate-pulse"></div>
@@ -81,7 +82,8 @@ export default function DynamicHeader() {
             <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!isDropdownOpen)}
-                className="w-11 h-11 bg-orange-500 text-white flex items-center justify-center rounded-full font-bold text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                onBlur={() => setTimeout(() => setDropdownOpen(false), 150)}
+                className="cursor-pointer w-11 h-11 bg-orange-500 text-white flex items-center justify-center rounded-full font-bold text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
               >
                 {getInitials(user.email)}
               </button>
@@ -95,22 +97,29 @@ export default function DynamicHeader() {
                     <p className="truncate text-gray-500">{user.email}</p>
                   </div>
 
-                  {/* Show dashboard if user is seller */}
-                  {user.role === "seller" && (
-                    <button
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        router.push("/seller/dashboard");
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-100 flex items-center gap-2"
-                    >
-                      🧰 Dashboard
-                    </button>
-                  )}
+                  <button
+                    onClick={handleDashboardClick}
+                    className="cursor-pointer w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                  >
+                    <LayoutDashboard size={16} />
+                    Dashboard
+                  </button>
+                  
+                  {/* --- NEW: Edit Profile Button --- */}
+                  <button
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      router.push("/user/profile");
+                    }}
+                    className="cursor-pointer w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                  >
+                    <UserCog size={16} />
+                    Edit Profile
+                  </button>
 
                   <button
                     onClick={handleSignOut}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
+                    className="cursor-pointer w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
                   >
                     <LogOut size={16} />
                     Sign Out
@@ -122,32 +131,32 @@ export default function DynamicHeader() {
             // --- Logged-out View ---
             <>
               <div className="hidden sm:flex items-center gap-4">
-                <a
+                <Link
                   href="/user/login"
                   className="text-gray-600 font-semibold hover:text-orange-500 transition-colors"
                 >
                   Login
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/user/register"
                   className="bg-orange-500 text-white font-bold py-2 px-4 rounded-full hover:bg-orange-600 transition-colors duration-300"
                 >
                   Register
-                </a>
+                </Link>
               </div>
               <div className="sm:hidden flex items-center gap-2">
-                <a
+                <Link
                   href="/user/login"
                   className="text-gray-600 p-2 rounded-full hover:bg-gray-100"
                 >
                   <LogIn size={22} />
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/user/register"
                   className="bg-orange-500 text-white font-bold py-2 px-3 rounded-full text-sm"
                 >
                   Register
-                </a>
+                </Link>
               </div>
             </>
           )}

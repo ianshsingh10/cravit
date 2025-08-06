@@ -16,4 +16,5 @@ const itemSchema = new mongoose.Schema({
   stars: { type: Number, default: 0 }, // average rating
 }, { timestamps: true });
 
-module.exports = mongoose.model('Item', itemSchema);
+
+export default mongoose.models.Item || mongoose.model("Item", itemSchema);
