@@ -20,7 +20,6 @@ export default function AddItemPage() {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Fetch user info and check role
   useEffect(() => {
     const fetchUser = async () => {
       setIsAuthLoading(true);
