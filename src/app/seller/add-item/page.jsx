@@ -108,7 +108,6 @@ export default function AddItemPage() {
     data.append("itemName", form.itemName);
     data.append("price", form.price);
     data.append("image", form.image);
-    // --- FIX: Add sellerId and sellerName to the form data ---
     data.append("sellerId", user._id); // Assuming user object has _id
     data.append("sellerName", user.name); // Assuming user object has name
 
