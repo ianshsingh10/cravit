@@ -76,7 +76,7 @@ export default function EditProfilePage() {
     }
 
     return (
-        <div className="min-h-167 bg-gray-50 flex flex-col justify-center items-center p-4">
+        <div className="bg-gray-50 flex flex-col justify-center items-center p:4 md:p-23">
             <div className="max-w-lg w-full mx-auto bg-white p-8 rounded-2xl shadow-lg">
                 <div className="text-center mb-8">
                     <h2 className="text-2xl font-bold text-gray-800">Edit Your Profile</h2>
