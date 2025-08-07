@@ -77,9 +77,6 @@ export default function LoginPage() {
     }
   };
 
-  const { data: session } = useSession();
-
-
   const [providers, setProviders] = useState(null);
 
   useEffect(() => {
@@ -149,7 +146,7 @@ export default function LoginPage() {
         </div>
 
         {/* Continue with Google button */}
-        {!session?.user && providers?.google && (
+        {providers?.google && (
           <button
             type="button"
             onClick={() => signIn("google")}
