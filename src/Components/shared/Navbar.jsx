@@ -40,18 +40,47 @@ const useUser = () => {
   return { user, setUser, isLoading };
 };
 
+// --- Helper Function to format URLs ---
+const formatRestaurantSlug = (name) => {
+    return name.toLowerCase().replace(/\s/g, '-').replace(/\(|\)/g, '');
+};
+
+
 // --- UI Components ---
 
 const RestaurantsDropdown = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [restaurants, setRestaurants] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const dropdownRef = useRef(null);
-    useClickOutside(dropdownRef, () => setIsOpen(false));
     
-    const restaurants = ["Mayuri (AB1)", "Mayuri (AB2)", "Mayuri (Canteen)", "Bistro by Safal", "Safal (Canteen)", "AB Dakshin", "UB (UnderBelly)"];
+    useEffect(() => {
+        const fetchRestaurants = async () => {
+            setIsLoading(true);
+            try {
+                const res = await fetch('/api/restaurants');
+                if (res.ok) {
+                    const data = await res.json();
+                    setRestaurants(data.restaurants || []);
+                }
+            } catch (error) {
+                console.error("Failed to fetch restaurants:", error);
+                setRestaurants([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchRestaurants();
+    }, []);
 
     return (
-        <div className="relative hidden md:block" ref={dropdownRef}>
-            <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-2 px-4 py-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors font-semibold text-gray-800 dark:text-gray-200">
+        <div 
+            className="relative hidden md:block" 
+            ref={dropdownRef}
+            onMouseEnter={() => setIsOpen(true)}
+            onMouseLeave={() => setIsOpen(false)}
+        >
+            <button className="flex items-center gap-2 px-4 py-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors font-semibold text-gray-800 dark:text-gray-200">
                 <Building size={18} />
                 <span>Restaurants</span>
                 <ChevronDown size={20} className={`text-gray-500 dark:text-gray-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
@@ -65,11 +94,20 @@ const RestaurantsDropdown = () => {
                         transition={{ duration: 0.2, ease: "easeOut" }}
                         className="absolute left-0 mt-3 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-2 ring-1 ring-black/5 dark:ring-white/10 z-20"
                     >
-                        {restaurants.map(name => (
-                            <Link key={name} href={`/restaurant/${name.toLowerCase().replace(/\s/g, '-')}`} className="block px-4 py-2.5 text-sm font-semibold text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                                {name}
-                            </Link>
-                        ))}
+                        {isLoading ? (
+                            <div className="p-4 text-center text-sm text-gray-500">Loading...</div>
+                        ) : (
+                            restaurants.map(restaurant => (
+                                <Link 
+                                    key={restaurant.id} 
+                                    href={`/restaurant/${restaurant.id}`} 
+                                    onClick={() => setIsOpen(false)}
+                                    className="block px-4 py-2.5 text-sm font-semibold text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                                >
+                                    {restaurant.name}
+                                </Link>
+                            ))
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -162,7 +200,23 @@ const AuthSkeleton = () => (
 
 const MobileMenu = ({ user, isOpen, onClose, onSignOut }) => {
     const router = useRouter();
-    const restaurants = ["Mayuri (AB1)", "Mayuri (AB2)", "Mayuri (Canteen)", "Bistro by Safal", "Safal (Canteen)", "AB Dakshin", "UB (UnderBelly)"];
+    const [restaurants, setRestaurants] = useState([]);
+    
+    useEffect(() => {
+        if (isOpen) {
+            const fetchRestaurants = async () => {
+                try {
+                    const res = await fetch('/api/restaurants');
+                    const data = await res.json();
+                    if (res.ok) setRestaurants(data.restaurants || []);
+                } catch (error) {
+                    console.error("Failed to fetch restaurants for mobile menu:", error);
+                }
+            };
+            fetchRestaurants();
+        }
+    }, [isOpen]);
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -194,9 +248,14 @@ const MobileMenu = ({ user, isOpen, onClose, onSignOut }) => {
                         <div className="flex-grow overflow-y-auto">
                             <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase px-4 mb-2">Restaurants</h3>
                             <div className="space-y-1">
-                                {restaurants.map(name => (
-                                    <Link key={name} href={`/restaurant/${name.toLowerCase().replace(/\s/g, '-')}`} className="block px-4 py-2.5 text-md font-medium text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                                        {name}
+                                {restaurants.map(restaurant => (
+                                    <Link 
+                                        key={restaurant.id} 
+                                        href={`/restaurant/${restaurant.id}`} 
+                                        onClick={onClose}
+                                        className="block px-4 py-2.5 text-md font-medium text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    >
+                                        {restaurant.name}
                                     </Link>
                                 ))}
                             </div>
@@ -222,6 +281,8 @@ const MobileMenu = ({ user, isOpen, onClose, onSignOut }) => {
         </AnimatePresence>
     );
 };
+
+// --- Main Header Component ---
 
 export default function DynamicHeader() {
   const { user, setUser, isLoading } = useUser();
