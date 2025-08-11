@@ -3,10 +3,11 @@ import OTP from "@/models/otp";
 import User from "@/models/user";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
+import bcrypt from "bcryptjs";
 
 export async function POST(req) {
-  const { email, otp, phoneNo, name } = await req.json();
-  if (!email || !otp || !phoneNo || !name) {
+  const { email, otp, phoneNo, name, password } = await req.json();
+  if (!email || !otp || !phoneNo || !name || !password) {
     return Response.json({ error: "Missing data" }, { status: 400 });
   }
 
@@ -19,7 +20,9 @@ export async function POST(req) {
 
   let user = await User.findOne({ email });
   if (!user) {
-    user = await User.create({ name, email, phoneNo });
+    // Hash the password before storing
+    const hashedPassword = await bcrypt.hash(password, 12);
+    user = await User.create({ name, email, phoneNo, password: hashedPassword });
   }
 
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });

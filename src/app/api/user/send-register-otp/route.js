@@ -4,9 +4,13 @@ import User from "@/models/user";
 import { sendEmailOtp } from "@/lib/sendEmailOTP";
 
 export async function POST(req) {
-  const { name, phoneNo, email } = await req.json();
-  if (!name || !phoneNo || !email) {
+  const { name, phoneNo, email, password } = await req.json();
+  if (!name || !phoneNo || !email || !password) {
     return Response.json({ error: "All fields required" }, { status: 400 });
+  }
+
+  if (password.length < 6) {
+    return Response.json({ error: "Password must be at least 6 characters long" }, { status: 400 });
   }
 
   await dbConnect();
