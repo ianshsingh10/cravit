@@ -1,6 +1,6 @@
 "use client";
 import { ShoppingBag } from "lucide-react";
-import { DashboardCard } from "@/components/ui/DashboardCard";
+import { DashboardCard } from "@/Components/ui/DashboardCard";
 
 const dummyOrders = [
     { id: '1', date: '2024-08-01', status: 'Delivered', total: 150, items: 'Samosa, Coffee' },

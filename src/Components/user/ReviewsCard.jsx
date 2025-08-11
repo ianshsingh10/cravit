@@ -1,6 +1,6 @@
 "use client";
 import { Star } from "lucide-react";
-import { DashboardCard } from "@/components/ui/DashboardCard";
+import { DashboardCard } from "@/Components/ui/DashboardCard";
 
 const dummyReviews = [
     { id: '1', itemName: 'Masala Dosa', rating: 5, comment: 'Absolutely delicious! Best dosa on campus.' },

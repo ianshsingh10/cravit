@@ -1,6 +1,6 @@
 "use client";
 import { Settings } from "lucide-react";
-import { DashboardCard } from "@/components/ui/DashboardCard";
+import { DashboardCard } from "@/Components/ui/DashboardCard";
 import { useRouter } from "next/navigation";
 
 export const ProfileCard = ({ user }) => {

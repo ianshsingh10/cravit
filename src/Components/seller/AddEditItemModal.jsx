@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from 'next/image';
 import { Package, CircleDollarSign, UploadCloud, Loader2, X } from 'lucide-react';
-import { Modal } from "@/components/ui/Modal";
+import { Modal } from "@/Components/ui/Modal";
 
 export const AddEditItemModal = ({ isOpen, onClose, item, user, onSuccess, onError }) => {
     const [form, setForm] = useState({ itemName: "", price: "", image: null });

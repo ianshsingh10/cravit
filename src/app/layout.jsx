@@ -1,8 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import DynamicHeader from "@/components/shared/Navbar";
-import HomeFooter from "@/components/shared/Footer";
+import DynamicHeader from "@/Components/shared/Navbar";
+import HomeFooter from "@/Components/shared/Footer";
 import "./globals.css";
-import{ Providers } from "@/components/shared/Provider";
+import{ Providers } from "@/Components/shared/Provider";
 
 
 const geistSans = Geist({

@@ -1,6 +1,6 @@
 "use client";
 import { AlertTriangle, Loader2 } from 'lucide-react';
-import { Modal } from "@/components/ui/Modal";
+import { Modal } from "@/Components/ui/Modal";
 
 export const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, item, isLoading }) => {
     return (
