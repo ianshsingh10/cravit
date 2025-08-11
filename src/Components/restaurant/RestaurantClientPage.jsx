@@ -8,7 +8,7 @@ import {
     MenuItemCard, 
     ItemDetailModal, 
     FloatingCartButton 
-} from "@/components/restaurant/RestaurantUI";
+} from "@/Components/restaurant/RestaurantUI";
 
 export default function RestaurantClientPage({ data }) {
     const [cart, setCart] = useState([]);

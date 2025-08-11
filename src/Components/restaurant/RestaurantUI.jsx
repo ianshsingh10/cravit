@@ -1,15 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import Image from "next/image";
 import { Star, Plus, Minus, ShoppingCart, X, Utensils, Info, CheckCircle2, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// --- Rebuilt Components ---
 
-/**
- * A more immersive hero section with clearer information hierarchy.
- */
 export const RestaurantHero = ({ name, cuisine, rating, image }) => {
     return (
         <div 
