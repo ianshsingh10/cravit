@@ -8,16 +8,11 @@ export default function HomePage() {
   return (
     <>
       <main>
-        {/* Hero Section */}
         <HeroSection/>
-        {/* Features Section */}
         <FeaturedSection/>
-        {/* Participating Outlets Section */}
         <OutletSection/>
-        {/* Testimonials Section */}
         <TestimonialsSection/>
       </main>
-      
     </>
   );
 }

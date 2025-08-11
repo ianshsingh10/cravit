@@ -69,37 +69,37 @@ export default function EditProfilePage() {
 
     if (isAuthLoading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex justify-center items-center">
                 <Loader2 className="w-12 h-12 text-orange-500 animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="bg-gray-50 flex flex-col justify-center items-center p-4 md:p-23">
-            <div className="max-w-lg w-full mx-auto bg-white p-8 rounded-2xl shadow-lg">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center p-4 pt-30">
+            <div className="max-w-lg w-full mx-auto bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
                 <div className="text-center mb-8">
-                    <h2 className="text-2xl font-bold text-gray-800">Edit Your Profile</h2>
-                    <p className="text-gray-500">Keep your information up to date.</p>
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Edit Your Profile</h2>
+                    <p className="text-gray-500 dark:text-gray-400">Keep your information up to date.</p>
                 </div>
 
-                {error && <p className="bg-red-100 text-red-700 p-3 rounded-lg mb-4 text-sm flex items-center gap-2"><AlertTriangle size={18}/> {error}</p>}
-                {success && <p className="bg-green-100 text-green-700 p-3 rounded-lg mb-4 text-sm flex items-center gap-2"><CheckCircle size={18}/> {success}</p>}
+                {error && <p className="bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-3 rounded-lg mb-4 text-sm flex items-center gap-2"><AlertTriangle size={18}/> {error}</p>}
+                {success && <p className="bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 p-3 rounded-lg mb-4 text-sm flex items-center gap-2"><CheckCircle size={18}/> {success}</p>}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        <input type="email" value={user?.email || ''} className="pl-10 text-gray-500 bg-gray-100 border border-gray-300 p-3 rounded-lg w-full" disabled />
+                        <input type="email" value={user?.email || ''} className="pl-10 text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full" disabled />
                     </div>
                     <div className="relative">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        <input name="name" value={form.name} placeholder="Your Full Name" className="pl-10 text-black border border-gray-300 p-3 rounded-lg w-full focus:ring-2 focus:ring-orange-400" onChange={handleChange} required />
+                        <input name="name" value={form.name} placeholder="Your Full Name" className="pl-10 text-black dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-orange-500" onChange={handleChange} required />
                     </div>
                     <div className="relative">
                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        <input name="phoneNo" type="tel" value={form.phoneNo} placeholder="Your Phone Number" className="pl-10 text-black border border-gray-300 p-3 rounded-lg w-full focus:ring-2 focus:ring-orange-400" onChange={handleChange} required />
+                        <input name="phoneNo" type="tel" value={form.phoneNo} placeholder="Your Phone Number" className="pl-10 text-black dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-orange-500" onChange={handleChange} required />
                     </div>
-                    <button type="submit" disabled={isLoading} className="w-full flex justify-center items-center gap-2 bg-orange-500 text-white font-bold px-4 py-3 rounded-lg hover:bg-orange-600 transition-colors disabled:bg-orange-300">
+                    <button type="submit" disabled={isLoading} className="w-full flex justify-center items-center gap-2 bg-orange-500 text-white font-bold px-4 py-3 rounded-lg hover:bg-orange-600 transition-colors disabled:bg-orange-400">
                         {isLoading ? <><Loader2 className="animate-spin" size={20}/> Saving...</> : "Save Changes"}
                     </button>
                 </form>
