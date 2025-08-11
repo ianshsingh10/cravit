@@ -6,9 +6,9 @@ import { Loader2, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
 
 // Import the new components
-import { OrderHistoryCard } from "@/components/user/OrderHistoryCard";
-import { ReviewsCard } from "@/components/user/ReviewsCard";
-import { ProfileCard } from "@/components/user/ProfileCard";
+import { OrderHistoryCard } from "@/Components/user/OrderHistoryCard";
+import { ReviewsCard } from "@/Components/user/ReviewsCard";
+import { ProfileCard } from "@/Components/user/ProfileCard";
 
 export default function UserDashboard() {
     const [user, setUser] = useState(null);
