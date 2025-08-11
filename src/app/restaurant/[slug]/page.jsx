@@ -1,5 +1,5 @@
 import { getRestaurantData } from "@/lib/restaurantData"; // We will create this helper
-import RestaurantClientPage from "@/components/restaurant/RestaurantClientPage";
+import RestaurantClientPage from "@/Components/restaurant/RestaurantClientPage";
 
 export default async function Page({ params }) {
   const { slug } = await params;

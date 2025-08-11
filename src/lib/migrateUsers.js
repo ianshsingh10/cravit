@@ -2,13 +2,10 @@ import dbConnect from "./dbConnect.js";
 import User from "../models/user.js";
 import bcrypt from "bcryptjs";
 
-// This script can be run to migrate existing users who don't have passwords
-// It will set a default password for users without one (excluding Google OAuth users)
 export async function migrateUsersWithoutPasswords() {
   try {
     await dbConnect();
     
-    // Find users without passwords (but exclude those who might be Google OAuth users)
     const usersWithoutPassword = await User.find({ 
       $or: [
         { password: { $exists: false } },
