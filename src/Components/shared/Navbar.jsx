@@ -162,7 +162,7 @@ const AuthSkeleton = () => (
 
 const MobileMenu = ({ user, isOpen, onClose, onSignOut }) => {
     const router = useRouter();
-    const restaurants = ["Mayuri (AB1)", "Bistro by Safal", "AB Dakshin", "UB (UnderBelly)", "Darling Residency"];
+    const restaurants = ["Mayuri (AB1)", "Mayuri (AB2)", "Mayuri (Canteen)", "Bistro by Safal", "Safal (Canteen)", "AB Dakshin", "UB (UnderBelly)"];
     return (
         <AnimatePresence>
             {isOpen && (
