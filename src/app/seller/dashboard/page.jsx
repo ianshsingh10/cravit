@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { Package, Loader2, PlusCircle, AlertTriangle, CheckCircle } from 'lucide-react';
 
 // Import the new components
-import { ItemCard, ItemCardSkeleton } from "@/components/seller/ItemCard";
-import { AddEditItemModal } from "@/components/seller/AddEditItemModal";
-import { DeleteConfirmationModal } from "@/components/seller/DeleteConfirmationModal";
+import { ItemCard, ItemCardSkeleton } from "@/Components/seller/ItemCard";
+import { AddEditItemModal } from "@/Components/seller/AddEditItemModal";
+import { DeleteConfirmationModal } from "@/Components/seller/DeleteConfirmationModal";
 
 export default function SellerDashboard() {
     const [items, setItems] = useState([]);
