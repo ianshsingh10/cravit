@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-// In a real app, you would fetch this list from your database.
 const allRestaurants = [
     { id: 'mayuri-ab1', name: 'Mayuri (AB1)' },
     { id: 'mayuri-ab2', name: 'Mayuri (AB2)' },
@@ -11,7 +10,6 @@ const allRestaurants = [
 
 export async function GET() {
   try {
-    // Simulate a database call delay
     await new Promise(resolve => setTimeout(resolve, 500)); 
     return NextResponse.json({ restaurants: allRestaurants });
   } catch (error) {
