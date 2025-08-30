@@ -5,12 +5,11 @@ import Image from "next/image";
 import { Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// --- Manually add your restaurant images here ---
 const restaurantImages = [
     "https://placehold.co/1600x900/f87171/ffffff?text=Mayuri",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRc7GfpEgNqDseVwgcCuX9dYa6XqKIELFSakw&s",
     "https://placehold.co/1600x900/60a5fa/ffffff?text=Bistro+by+Safal",
     "https://placehold.co/1600x900/34d399/ffffff?text=AB+Dakshin",
-    "https://placehold.co/1600x900/a78bfa/ffffff?text=UnderBelly",
 ];
 
 const BackgroundCarousel = ({ activeIndex }) => {
