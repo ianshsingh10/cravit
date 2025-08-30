@@ -11,9 +11,11 @@ const itemSchema = new mongoose.Schema({
   sellerName: { type: String, required: true },
   itemName: { type: String, required: true },
   price: { type: Number, required: true },
-  image: { type: String },
+  availablibil:{ type: Boolean, default: true},
+  image: { type: String},
+  category:{type: String},
   reviews: [reviewSchema],
-  stars: { type: Number, default: 0 }, // average rating
+  rating: { type: Number, default: 0 },
 }, { timestamps: true });
 
 
