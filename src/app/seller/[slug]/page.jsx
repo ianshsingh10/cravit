@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Loader2, AlertTriangle, Soup, Search } from 'lucide-react'; // Import Search icon
-import { MenuItemCard } from "@/components/user/MenuItemCard"; 
+import { MenuItemCard } from "@/Components/user/MenuItemCard"; 
 
 export default function SellerPage() {
     const params = useParams();
