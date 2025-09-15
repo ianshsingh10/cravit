@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Package, Loader2, PlusCircle, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Package, Loader2, PlusCircle, AlertTriangle, CheckCircle, Search } from 'lucide-react';
 import { ItemCard, ItemCardSkeleton } from "@/Components/seller/ItemCard";
 import { AddEditItemModal } from "@/Components/seller/AddEditItemModal";
 import { DeleteConfirmationModal } from "@/Components/seller/DeleteConfirmationModal";
@@ -19,6 +19,8 @@ export default function SellerDashboard() {
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
     const router = useRouter();
+
+    const [searchQuery, setSearchQuery] = useState("");
 
     const fetchItems = useCallback(async () => {
         setIsLoading(true);
@@ -115,7 +117,6 @@ export default function SellerDashboard() {
             const res = await fetch(`/api/items/availability`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                // ✅ FIX: Use the ID from the 'itemToToggle' argument, not 'currentItem'
                 body: JSON.stringify({ itemId: itemToToggle._id }),
             });
     
@@ -137,6 +138,10 @@ export default function SellerDashboard() {
         }
     };
 
+    const filteredItems = items.filter(item =>
+        item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) || item.category.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     if (isAuthLoading) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex justify-center items-center">
@@ -148,15 +153,27 @@ export default function SellerDashboard() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">
-                <div className="flex flex-col md:flex-row gap-4 md:gap-0 justify-between items-center mb-8">
+                <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-8">
                     <div className="text-center md:text-left">
                         <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Manage Your Items</h1>
                         <p className="text-gray-500 dark:text-gray-400 mt-1">Add, edit, or remove your menu items here.</p>
                     </div>
-                    <button onClick={handleOpenAddModal} className="w-full md:w-auto flex items-center justify-center gap-2 bg-orange-500 text-white font-bold py-3 px-5 rounded-full hover:bg-orange-600 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                        <PlusCircle size={20} />
-                        <span>Add New Item</span>
-                    </button>
+                    <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+                        <div className="relative w-full md:w-auto">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                            <input
+                                type="text"
+                                placeholder="Search your items..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            />
+                        </div>
+                        <button onClick={handleOpenAddModal} className="w-full md:w-auto flex-shrink-0 flex items-center justify-center gap-2 bg-orange-500 text-white font-bold py-3 px-5 rounded-full hover:bg-orange-600 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                            <PlusCircle size={20} />
+                            <span>Add New Item</span>
+                        </button>
+                    </div>
                 </div>
                 
                 {error && <p className="bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-3 rounded-lg mb-4 text-sm flex items-center gap-2"><AlertTriangle size={18}/> {error}</p>}
@@ -167,17 +184,25 @@ export default function SellerDashboard() {
                          {[...Array(8)].map((_, i) => <ItemCardSkeleton key={i} />)}
                     </div>
                 ) : items.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                        {items.map(item => (
-                            <ItemCard 
-                                key={item._id} 
-                                item={item} 
-                                onEdit={handleOpenEditModal} 
-                                onDelete={handleOpenDeleteModal}
-                                onToggleAvailability={handleToggleAvailability}
-                            />
-                        ))}
-                    </div>
+                    filteredItems.length > 0 ? (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                            {filteredItems.map(item => (
+                                <ItemCard 
+                                    key={item._id} 
+                                    item={item} 
+                                    onEdit={handleOpenEditModal} 
+                                    onDelete={handleOpenDeleteModal}
+                                    onToggleAvailability={handleToggleAvailability}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-16 bg-white dark:bg-gray-800/50 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                            <Search className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto" />
+                            <h3 className="mt-4 text-xl font-medium text-gray-900 dark:text-gray-100">No items match your search</h3>
+                            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Try using a different keyword to find what you're looking for.</p>
+                        </div>
+                    )
                 ) : (
                     <div className="text-center py-16 bg-white dark:bg-gray-800/50 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
                         <Package className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto" />

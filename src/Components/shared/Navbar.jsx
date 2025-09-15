@@ -12,8 +12,10 @@ import {
   Menu,
   X,
   Building,
+  ShoppingCart,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+// ✅ FIX: Import 'usePathname' from 'next/navigation'
+import { useRouter, usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 
 const useClickOutside = (ref, callback) => {
@@ -46,7 +48,8 @@ const useUser = () => {
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
-  return { user, setUser, isLoading };
+
+  return { user, setUser, isLoading, fetchUser };
 };
 
 const SellersDropdown = () => {
@@ -75,6 +78,7 @@ const SellersDropdown = () => {
 
     fetchSellers();
   }, []);
+
   return (
     <div className="relative hidden md:block" ref={dropdownRef}>
       <button
@@ -109,7 +113,8 @@ const SellersDropdown = () => {
                   key={seller._id}
                   href={`/seller/${seller.name
                     .toLowerCase()
-                    .replace(/\s/g, "-")}`}
+                    .replace(/\s+/g, "-")}`}
+                  onClick={() => setIsOpen(false)}
                   className="block px-4 py-2.5 text-sm font-semibold text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   {seller.name}
@@ -126,6 +131,25 @@ const SellersDropdown = () => {
     </div>
   );
 };
+
+const CartButton = ({ count }) => (
+  <Link href="/cart" className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+    <ShoppingCart size={24} className="text-gray-700 dark:text-gray-300"/>
+    {count > 0 && (
+      <AnimatePresence>
+        <motion.span
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.5, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 500, damping: 20 }}
+          className="absolute top-0 right-0 block h-5 w-5 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center ring-2 ring-white dark:ring-gray-900"
+        >
+          {count}
+        </motion.span>
+      </AnimatePresence>
+    )}
+  </Link>
+);
 
 const ProfileButton = React.forwardRef(({ user, isOpen, onClick }, ref) => (
   <button
@@ -148,7 +172,7 @@ const ProfileButton = React.forwardRef(({ user, isOpen, onClick }, ref) => (
         height={40}
         className="rounded-full"
       />
-      <span className="absolute bottom-0.5 right-0.5 block h-3 w-3 rounded-full bg-green-500 ring-2 ring-white" />
+      <span className="absolute bottom-0.5 right-0.5 block h-3 w-3 rounded-full bg-green-500 ring-2 ring-white dark:ring-gray-900" />
     </div>
   </button>
 ));
@@ -250,18 +274,18 @@ const AuthSkeleton = () => (
   <div className="h-11 w-28 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
 );
 
-const MobileMenu = ({ user, isOpen, onClose, onSignOut }) => {
+const MobileMenu = ({ user, isOpen, onClose, onSignOut, cartCount }) => {
   const router = useRouter();
   const [sellers, setSellers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!isOpen) return;
     const fetchSellers = async () => {
+      setIsLoading(true);
       try {
         const response = await fetch("/api/seller");
-        if (!response.ok) {
-          throw new Error("Failed to fetch sellers");
-        }
+        if (!response.ok) throw new Error("Failed to fetch sellers");
         const data = await response.json();
         setSellers(data);
       } catch (error) {
@@ -271,7 +295,7 @@ const MobileMenu = ({ user, isOpen, onClose, onSignOut }) => {
       }
     };
     fetchSellers();
-  }, []);
+  }, [isOpen]);
 
   return (
     <AnimatePresence>
@@ -325,7 +349,8 @@ const MobileMenu = ({ user, isOpen, onClose, onSignOut }) => {
                       key={seller._id}
                       href={`/seller/${seller.name
                         .toLowerCase()
-                        .replace(/\s/g, "-")}`}
+                        .replace(/\s+/g, "-")}`}
+                      onClick={onClose}
                       className="block px-4 py-2.5 text-md font-medium text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       {seller.name}
@@ -342,6 +367,26 @@ const MobileMenu = ({ user, isOpen, onClose, onSignOut }) => {
             <div className="border-t dark:border-gray-700 pt-6 mt-6">
               {user ? (
                 <div className="space-y-2">
+                  {user.role === 'user' && (
+                     <MenuItem
+                        icon={
+                          <div className="relative">
+                            <ShoppingCart size={18} />
+                            {cartCount > 0 && (
+                              <span className="absolute -top-1 -right-2 block h-4 w-4 rounded-full bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center">
+                                {cartCount}
+                              </span>
+                            )}
+                          </div>
+                        }
+                        onClick={() => {
+                          onClose();
+                          router.push("/cart");
+                        }}
+                      >
+                        My Cart
+                      </MenuItem>
+                  )}
                   <MenuItem
                     icon={<LayoutDashboard size={18} />}
                     onClick={() => {
@@ -402,14 +447,38 @@ export default function DynamicHeader() {
   const { user, setUser, isLoading } = useUser();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+  const pathname = usePathname();
   const dropdownRef = useRef(null);
 
   useClickOutside(dropdownRef, () => setDropdownOpen(false));
+  
+  const fetchCartCount = useCallback(async () => {
+    if (user && user.role === 'user') {
+      try {
+        const res = await fetch('/api/cart/count');
+        if (res.ok) {
+          const data = await res.json();
+          setCartCount(data.count);
+        }
+      } catch (error) {
+        console.error("Failed to fetch cart count:", error);
+      }
+    } else {
+      setCartCount(0);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchCartCount();
+  }, [user, pathname, fetchCartCount]);
+
 
   const handleSignOut = async () => {
     try {
       await fetch("/api/user/logout", { method: "POST" });
     } catch {
+      // Intentionally empty
     } finally {
       setUser(null);
       setDropdownOpen(false);
@@ -438,25 +507,28 @@ export default function DynamicHeader() {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="hidden sm:flex">
+              <div className="hidden sm:flex items-center gap-4">
                 {isLoading ? (
                   <AuthSkeleton />
                 ) : user ? (
-                  <div className="relative" ref={dropdownRef}>
-                    <ProfileButton
-                      user={user}
-                      isOpen={isDropdownOpen}
-                      onClick={() => setDropdownOpen((v) => !v)}
-                    />
-                    <AnimatePresence>
-                      {isDropdownOpen && (
-                        <UserDropdownMenu
-                          user={user}
-                          onSignOut={handleSignOut}
-                        />
-                      )}
-                    </AnimatePresence>
-                  </div>
+                  <>
+                    {user.role === 'user' && <CartButton count={cartCount} />}
+                    <div className="relative" ref={dropdownRef}>
+                      <ProfileButton
+                        user={user}
+                        isOpen={isDropdownOpen}
+                        onClick={() => setDropdownOpen((v) => !v)}
+                      />
+                      <AnimatePresence>
+                        {isDropdownOpen && (
+                          <UserDropdownMenu
+                            user={user}
+                            onSignOut={handleSignOut}
+                          />
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </>
                 ) : (
                   <GuestActions />
                 )}
@@ -476,6 +548,7 @@ export default function DynamicHeader() {
         isOpen={isMobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
         onSignOut={handleSignOut}
+        cartCount={cartCount}
       />
     </>
   );
