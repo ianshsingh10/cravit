@@ -1,4 +1,3 @@
-// File path: /app/api/items/delete/route.js
 
 import dbConnect from "@/lib/dbConnect";
 import Item from "@/models/items";
@@ -10,8 +9,9 @@ export async function DELETE(req) {
   await dbConnect();
 
   try {
-    // Verify user is a seller
-    const token = cookies().get("token")?.value;
+    const cookie = await cookies();
+    const token = cookie.get("token")?.value;
+
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     jwt.verify(token, process.env.JWT_SECRET);
 

@@ -13,10 +13,10 @@ export const AddEditItemModal = ({ isOpen, onClose, item, user, onSuccess, onErr
 
     useEffect(() => {
         if (item) {
-            setForm({ itemName: item.itemName, price: item.price, image: null });
+            setForm({ itemName: item.itemName, price: item.price, category: item.category, image: null });
             setImagePreview(item.image);
         } else {
-            setForm({ itemName: "", price: "", image: null });
+            setForm({ itemName: "", price: "", category:"", image: null });
             setImagePreview(null);
         }
     }, [item, isOpen]);
@@ -47,6 +47,7 @@ export const AddEditItemModal = ({ isOpen, onClose, item, user, onSuccess, onErr
         const data = new FormData();
         data.append("itemName", form.itemName);
         data.append("price", form.price);
+        data.append("category", form.category);
         if (form.image) data.append("image", form.image);
         
         const url = item ? '/api/items/edit' : '/api/items/upload';
@@ -82,6 +83,10 @@ export const AddEditItemModal = ({ isOpen, onClose, item, user, onSuccess, onErr
                 <div className="relative">
                     <CircleDollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                     <input name="price" type="number" value={form.price} placeholder="Price (in INR)" className="pl-10 text-black dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-orange-500" onChange={handleChange} required />
+                </div>
+                <div className="relative">
+                    <Package className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                    <input name="category" value={form.category} placeholder="Category" className="pl-10 text-black dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-orange-500" onChange={handleChange} required />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Item Image</label>

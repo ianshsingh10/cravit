@@ -11,7 +11,7 @@ const itemSchema = new mongoose.Schema({
   sellerName: { type: String, required: true },
   itemName: { type: String, required: true },
   price: { type: Number, required: true },
-  availablibil:{ type: Boolean, default: true},
+  availability:{ type: Boolean, default: true},
   image: { type: String},
   category:{type: String},
   reviews: [reviewSchema],

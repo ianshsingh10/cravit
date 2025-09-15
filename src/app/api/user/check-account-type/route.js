@@ -15,14 +15,12 @@ export async function POST(req) {
     if (!user) {
       return Response.json({ error: "User not found" }, { status: 404 });
     }
-
-    // Check if user has a password set
+    
     const hasPassword = user.password && user.password !== "";
     
     return Response.json({ 
       hasPassword,
       accountType: hasPassword ? "email_password" : "google_oauth",
-      message: hasPassword ? "Account requires password" : "Google OAuth account - no password required"
     });
     
   } catch (error) {

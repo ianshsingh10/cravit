@@ -3,8 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Package, Loader2, PlusCircle, AlertTriangle, CheckCircle } from 'lucide-react';
-
-// Import the new components
 import { ItemCard, ItemCardSkeleton } from "@/Components/seller/ItemCard";
 import { AddEditItemModal } from "@/Components/seller/AddEditItemModal";
 import { DeleteConfirmationModal } from "@/Components/seller/DeleteConfirmationModal";
@@ -109,6 +107,36 @@ export default function SellerDashboard() {
         }
     };
 
+    const handleToggleAvailability = async (itemToToggle) => {
+        setError("");
+        setSuccess("");
+    
+        try {
+            const res = await fetch(`/api/items/availability`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                // ✅ FIX: Use the ID from the 'itemToToggle' argument, not 'currentItem'
+                body: JSON.stringify({ itemId: itemToToggle._id }),
+            });
+    
+            const updatedItem = await res.json();
+    
+            if (res.ok) {
+                setItems(currentItems =>
+                    currentItems.map(item =>
+                        item._id === updatedItem._id ? updatedItem : item
+                    )
+                );
+                setSuccess("Item availability updated.");
+                setTimeout(() => setSuccess(""), 3000);
+            } else {
+                setError(updatedItem.error || "Failed to update availability.");
+            }
+        } catch (err) {
+            setError("An error occurred while updating the item.");
+        }
+    };
+
     if (isAuthLoading) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex justify-center items-center">
@@ -141,7 +169,13 @@ export default function SellerDashboard() {
                 ) : items.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                         {items.map(item => (
-                            <ItemCard key={item._id} item={item} onEdit={handleOpenEditModal} onDelete={handleOpenDeleteModal} />
+                            <ItemCard 
+                                key={item._id} 
+                                item={item} 
+                                onEdit={handleOpenEditModal} 
+                                onDelete={handleOpenDeleteModal}
+                                onToggleAvailability={handleToggleAvailability}
+                            />
                         ))}
                     </div>
                 ) : (

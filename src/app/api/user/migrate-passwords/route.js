@@ -2,8 +2,6 @@ import { migrateUsersWithoutPasswords } from "@/lib/migrateUsers";
 
 export async function POST(req) {
   try {
-    // This endpoint should be protected in production
-    // For now, it's open for development purposes
     await migrateUsersWithoutPasswords();
     
     return Response.json({ 

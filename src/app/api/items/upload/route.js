@@ -20,7 +20,6 @@ export async function POST(req) {
         folder: "items",
       });
     } else {
-      // Set the default URL to the uploadRes variable
       uploadRes = {
         secure_url:
           "https://res.cloudinary.com/dt8txihg4/image/upload/v1754516667/items/bp7jylyoiotgytnbppdg.png",
@@ -32,6 +31,7 @@ export async function POST(req) {
       sellerName: formData.get("sellerName"),
       itemName: formData.get("itemName"),
       price: formData.get("price"),
+      category: formData.get("category"),
       image: uploadRes.secure_url,
     });
 

@@ -11,7 +11,6 @@ export async function PUT(req) {
   await dbConnect();
 
   try {
-    // Verify user is a seller
     const token = cookies().get("token")?.value;
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     jwt.verify(token, process.env.JWT_SECRET);
@@ -21,21 +20,24 @@ export async function PUT(req) {
     const itemName = formData.get("itemName");
     const price = formData.get("price");
     const file = formData.get("image");
+    const category = formData.get("category");
+    const availibility = formData.get("availibility");
 
     if (!itemId) {
       return NextResponse.json({ error: "Item ID is required" }, { status: 400 });
     }
 
     const itemToUpdate = await Item.findById(itemId);
+    
     if (!itemToUpdate) {
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
 
-    // Update fields
     itemToUpdate.itemName = itemName;
     itemToUpdate.price = price;
+    itemToUpdate.category = category;
+    itemToUpdate.availibility = availibility;
 
-    // If a new image is provided, upload it to Cloudinary and update the URL
     if (file) {
       const buffer = Buffer.from(await file.arrayBuffer());
       const base64Image = `data:${file.type};base64,${buffer.toString("base64")}`;

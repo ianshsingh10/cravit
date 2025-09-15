@@ -18,7 +18,7 @@ const GoogleIcon = () => (
 
 
 export default function LoginPage() {
-  const [step, setStep] = useState("enter"); // "enter" or "verify"
+  const [step, setStep] = useState("enter");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
@@ -56,7 +56,7 @@ export default function LoginPage() {
       const data = await res.json();
       if (res.ok) {
         if (data.isGoogleUser) {
-          setMsg(`OTP sent to ${email} (Google account detected)`);
+          setMsg(`OTP sent to ${email}`);
           setIsGoogleUser(true);
         } else {
           setMsg(`OTP sent to ${email}`);
@@ -92,7 +92,7 @@ export default function LoginPage() {
       const data = await res.json();
       if (res.ok) {
         setMsg("Login successful! Redirecting...");
-        window.location.href = "/"; // Force a hard reload to update header state
+        window.location.href = "/";
       } else {
         setError(data.error || "Invalid OTP. Please try again.");
       }
@@ -149,11 +149,6 @@ export default function LoginPage() {
             <p className="text-center text-gray-600 dark:text-gray-400 text-sm">
               Enter the 6-digit code sent to your email.
             </p>
-            {isGoogleUser && (
-              <p className="text-center text-blue-600 dark:text-blue-400 text-sm">
-                Google account detected - no password required
-              </p>
-            )}
             <div className="relative">
               <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input type="text" placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} maxLength="6" className="text-black dark:text-white bg-white dark:bg-gray-700 pl-10 border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full text-center tracking-[0.5em] focus:ring-2 focus:ring-orange-500 focus:border-transparent transition" required/>
