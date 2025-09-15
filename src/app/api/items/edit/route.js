@@ -1,5 +1,3 @@
-// File path: /app/api/items/edit/route.js
-
 import dbConnect from "@/lib/dbConnect";
 import Item from "@/models/items";
 import cloudinary from "@/lib/cloudinary";
@@ -21,14 +19,13 @@ export async function PUT(req) {
     const price = formData.get("price");
     const file = formData.get("image");
     const category = formData.get("category");
-    const availibility = formData.get("availibility");
 
     if (!itemId) {
       return NextResponse.json({ error: "Item ID is required" }, { status: 400 });
     }
 
     const itemToUpdate = await Item.findById(itemId);
-    
+
     if (!itemToUpdate) {
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
@@ -36,7 +33,6 @@ export async function PUT(req) {
     itemToUpdate.itemName = itemName;
     itemToUpdate.price = price;
     itemToUpdate.category = category;
-    itemToUpdate.availibility = availibility;
 
     if (file) {
       const buffer = Buffer.from(await file.arrayBuffer());
