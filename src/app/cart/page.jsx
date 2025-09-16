@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Loader2, AlertTriangle, Trash2, Plus, Minus, ShoppingCart } from 'lucide-react';
+import { useRouter } from "next/navigation";
 
 const CartItemRow = ({ item, onUpdate, onRemove, onServiceChange, isUpdating }) => {
     return (
@@ -82,6 +83,9 @@ export default function CartPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isUpdating, setIsUpdating] = useState(false);
     const [error, setError] = useState("");
+    const [isCheckingOut, setIsCheckingOut] = useState(false);
+    
+    const router = useRouter();
 
     useEffect(() => {
         const fetchCartItems = async () => {
@@ -148,6 +152,7 @@ export default function CartPage() {
             });
             if (!res.ok) throw new Error("Failed to remove item");
             setCartItems(currentItems => currentItems.filter(item => item._id !== cartItemId));
+            fetchCount(); // Update header count
         } catch (err) {
             alert(err.message);
         } finally {
@@ -155,7 +160,7 @@ export default function CartPage() {
         }
     };
     
-    const { subtotal, parcelCharges, upi, grandTotal } = useMemo(() => {
+    const { subtotal, parcelCharges, upiCharges, grandTotal } = useMemo(() => {
         let subtotal = 0;
         let parcelCharges = 0;
         cartItems.forEach(item => {
@@ -164,11 +169,32 @@ export default function CartPage() {
                 parcelCharges += 10 * item.quantity;
             }
         });
-        const total = subtotal + parcelCharges;
-        const upi=  total/.974- total;
-        const grandTotal= total/.974;
-        return { subtotal, parcelCharges, upi, grandTotal };
+
+        const totalBeforeFees = subtotal + parcelCharges;
+        const grandTotal = totalBeforeFees / 0.96; 
+        const upiCharges = grandTotal - totalBeforeFees;
+        
+        return { subtotal, parcelCharges, upiCharges, grandTotal };
     }, [cartItems]);
+
+    const handleCheckout = async () => {
+        setIsCheckingOut(true);
+        try {
+            const res = await fetch('/api/orders/create', { method: 'POST' });
+            if (!res.ok) {
+                const result = await res.json();
+                throw new Error(result.error || "Checkout failed. Please try again.");
+            }
+            alert("Your order has been placed successfully!");
+            setCartItems([]);
+            fetchCount(); // Reset header count to 0
+            router.push('/user/dashboard'); 
+        } catch (err) {
+            alert(err.message);
+        } finally {
+            setIsCheckingOut(false);
+        }
+    };
 
     if (isLoading) {
         return <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex justify-center items-center"><Loader2 className="w-12 h-12 animate-spin text-orange-500" /></div>;
@@ -206,17 +232,22 @@ export default function CartPage() {
                                     <span>Parcel Charges</span>
                                     <span>₹{parcelCharges.toFixed(2)}</span>
                                 </div>
+                                {/* ✅ Added UPI Charges display */}
                                 <div className="flex justify-between text-gray-600 dark:text-gray-300">
                                     <span>UPI Charges</span>
-                                    <span>₹{upi.toFixed(2)}</span>
+                                    <span>₹{upiCharges.toFixed(2)}</span>
                                 </div>
                                 <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
                                 <div className="flex justify-between text-xl font-bold text-gray-900 dark:text-white">
                                     <span>Grand Total</span>
                                     <span>₹{grandTotal.toFixed(2)}</span>
                                 </div>
-                                <button className="w-full bg-orange-500 text-white font-bold py-3 rounded-xl text-lg hover:bg-orange-600 transition-all shadow-md hover:shadow-lg">
-                                    Proceed to Checkout
+                                <button 
+                                    onClick={handleCheckout}
+                                    disabled={isCheckingOut}
+                                    className="w-full bg-orange-500 text-white font-bold py-3 rounded-xl text-lg hover:bg-orange-600 transition-all shadow-md hover:shadow-lg disabled:bg-orange-400 disabled:cursor-not-allowed flex justify-center items-center"
+                                >
+                                    {isCheckingOut ? <Loader2 className="animate-spin" /> : 'Proceed to Checkout'}
                                 </button>
                             </div>
                         </div>

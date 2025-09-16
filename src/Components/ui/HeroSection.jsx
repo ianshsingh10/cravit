@@ -6,10 +6,9 @@ import { Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const restaurantImages = [
-    "https://placehold.co/1600x900/f87171/ffffff?text=Mayuri",
+    "https://res.cloudinary.com/dt8txihg4/image/upload/v1758022157/bistro-img_vshkxz.jpg",
+    "https://res.cloudinary.com/dt8txihg4/image/upload/v1758022158/mayuri-img_tkkcy1.jpg",
     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRc7GfpEgNqDseVwgcCuX9dYa6XqKIELFSakw&s",
-    "https://placehold.co/1600x900/60a5fa/ffffff?text=Bistro+by+Safal",
-    "https://placehold.co/1600x900/34d399/ffffff?text=AB+Dakshin",
 ];
 
 const BackgroundCarousel = ({ activeIndex }) => {

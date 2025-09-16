@@ -81,10 +81,10 @@ export default function UserDashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2 space-y-8">
                         <OrderHistoryCard />
-                        <ReviewsCard />
                     </div>
-                    <div className="lg:col-span-1">
+                    <div className="lg:col-span-1  space-y-8">
                         <ProfileCard user={user} />
+                        <ReviewsCard />
                     </div>
                 </div>
             </div>
