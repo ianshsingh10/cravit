@@ -39,6 +39,14 @@ export async function POST(req) {
             return NextResponse.json({ error: "Your cart is empty." }, { status: 400 });
         }
         
+        for (const cartItem of cartItems) {
+            if (!cartItem.itemId?.availability) {
+                return NextResponse.json({ 
+                    error: `Sorry, "${cartItem.itemName}" is no longer available. Please remove it from your cart.` 
+                }, { status: 400 });
+            }
+        }
+
         const ordersBySeller = {};
         for (const cartItem of cartItems) {
             if (!cartItem.itemId || !cartItem.itemId.sellerId) {

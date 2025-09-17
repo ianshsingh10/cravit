@@ -5,7 +5,6 @@ import { ShoppingBag, CheckCircle, XCircle, Clock, ArrowRight, RefreshCw, X } fr
 import { DashboardCard } from "@/Components/ui/DashboardCard";
 import { AnimatePresence, motion } from "framer-motion";
 
-// A simple skeleton component for the loading state
 const OrderSkeleton = () => (
     <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg animate-pulse">
         <div className="flex items-center gap-4">
@@ -19,7 +18,6 @@ const OrderSkeleton = () => (
     </div>
 );
 
-// A sub-component for showing a status with a corresponding icon and color
 const StatusIndicator = ({ status }) => {
     const statusConfig = {
         Delivered: { icon: <CheckCircle className="w-4 h-4 text-green-500" />, color: 'text-green-600 dark:text-green-400' },
@@ -41,9 +39,7 @@ const StatusIndicator = ({ status }) => {
     );
 };
 
-// A dedicated modal component for showing order details
 const OrderDetailsModal = ({ order, onClose }) => {
-    // Re-calculate the price breakup for the selected order
     const { subtotal, parcelCharges } = useMemo(() => {
         if (!order) return { subtotal: 0, parcelCharges: 0, upiCharges: 0 };
 
@@ -190,7 +186,7 @@ export const OrderHistoryCard = () => {
                             </div>
                             <StatusIndicator status={order.status} />
                         </div>
-                        <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex-wrap gap-2">
                            <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">
                                ID: {order.orderNumber}
                            </p>

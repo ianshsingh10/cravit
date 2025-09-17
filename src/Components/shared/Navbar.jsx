@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -18,58 +18,9 @@ import {
 import { useRouter, usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 
-// Note: For a real project, these hooks should be in their own files (e.g., /hooks/useUser.js)
+import { useUser } from "@/Components/stores/useUser";
+import useCartStore from '@/Components/stores/cartStore';
 
-const useUser = () => {
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchUser = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/user/me");
-      const data = res.ok ? await res.json() : { user: null };
-      setUser(data.user);
-    } catch {
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
-
-  return { user, setUser, isLoading };
-};
-
-const useCartCount = (user) => {
-  const [cartCount, setCartCount] = useState(0);
-  const pathname = usePathname();
-
-  const fetchCartCount = useCallback(async () => {
-    if (user && user.role === "user") {
-      try {
-        const res = await fetch("/api/cart/count");
-        if (res.ok) {
-          const data = await res.json();
-          setCartCount(data.count);
-        }
-      } catch (error) {
-        console.error("Failed to fetch cart count:", error);
-      }
-    } else {
-      setCartCount(0);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    fetchCartCount();
-  }, [user, pathname, fetchCartCount]);
-
-  return { cartCount };
-};
 
 const useClickOutside = (ref, callback) => {
   useEffect(() => {
@@ -80,8 +31,6 @@ const useClickOutside = (ref, callback) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [ref, callback]);
 };
-
-// --- Sub-Components ---
 
 const SellersDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -246,6 +195,11 @@ const UserDropdownMenu = ({ user, onSignOut }) => {
         <MenuItem icon={<LayoutDashboard size={18} />} onClick={() => router.push(user?.role === "seller" ? "/seller/dashboard" : "/user/dashboard")}>
           Dashboard
         </MenuItem>
+        {user?.role === 'seller' && (
+            <MenuItem icon={<Package size={18} />} onClick={() => router.push("/seller/orders")}>
+              Received Orders
+            </MenuItem>
+        )}
         <MenuItem icon={<UserCog size={18} />} onClick={() => router.push("/user/profile")}>
           Edit Profile
         </MenuItem>
@@ -359,13 +313,20 @@ const MobileMenu = ({ user, isOpen, onClose, onSignOut, cartCount }) => {
 
 export default function DynamicHeader() {
   const { user, setUser, isLoading } = useUser();
-  const { cartCount } = useCartCount(user);
+  const { count: cartCount, fetchCount } = useCartStore();
   
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const pathname = usePathname();
 
   useClickOutside(dropdownRef, () => setDropdownOpen(false));
+
+  useEffect(() => {
+    if (user && user.role === 'user') {
+      fetchCount();
+    }
+  }, [user, pathname, fetchCount]);
 
   const handleSignOut = async () => {
     try {

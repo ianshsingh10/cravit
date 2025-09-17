@@ -5,7 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { Loader2, AlertTriangle, Trash2, Plus, Minus, ShoppingCart } from 'lucide-react';
 import { useRouter } from "next/navigation";
+import useCartStore from '@/Components/stores/cartStore'; // ✅ FIX: Import the global cart store
 
+// CartItemRow sub-component remains the same.
 const CartItemRow = ({ item, onUpdate, onRemove, onServiceChange, isUpdating }) => {
     return (
         <div className="flex items-center flex-wrap gap-4 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -41,7 +43,7 @@ const CartItemRow = ({ item, onUpdate, onRemove, onServiceChange, isUpdating }) 
                             : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300'
                         }`}
                     >
-                        Parcel
+                        Parcel {item.service === 'parcel' && `(+₹10)`}
                     </button>
                 </div>
             </div>
@@ -86,6 +88,7 @@ export default function CartPage() {
     const [isCheckingOut, setIsCheckingOut] = useState(false);
     
     const router = useRouter();
+    const { fetchCount } = useCartStore(); // ✅ FIX: Get the fetchCount function from the store
 
     useEffect(() => {
         const fetchCartItems = async () => {
@@ -232,7 +235,6 @@ export default function CartPage() {
                                     <span>Parcel Charges</span>
                                     <span>₹{parcelCharges.toFixed(2)}</span>
                                 </div>
-                                {/* ✅ Added UPI Charges display */}
                                 <div className="flex justify-between text-gray-600 dark:text-gray-300">
                                     <span>UPI Charges</span>
                                     <span>₹{upiCharges.toFixed(2)}</span>
