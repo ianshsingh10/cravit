@@ -7,7 +7,7 @@ export async function POST(req) {
   try {
     await dbConnect();
     const formData = await req.formData();
-    const file = formData.get("image"); // Declare uploadRes outside the conditional block
+    const file = formData.get("image");
 
     let uploadRes;
 

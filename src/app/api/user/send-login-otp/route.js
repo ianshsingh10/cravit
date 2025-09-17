@@ -12,7 +12,6 @@ export async function POST(req) {
   const user = await User.findOne({ email });
   if (!user) return Response.json({ error: "Invalid credentials" }, { status: 401 });
 
-  // If user has no password (Google OAuth user), send OTP directly
   if (!user.password || user.password === "") {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     await OTP.findOneAndUpdate({ email }, { code: otp, createdAt: new Date() }, { upsert: true });
@@ -20,7 +19,6 @@ export async function POST(req) {
     return Response.json({ message: "OTP sent", isGoogleUser: true });
   }
 
-  // If user has password, verify it
   if (!password) {
     return Response.json({ error: "Password is required for this account" }, { status: 400 });
   }

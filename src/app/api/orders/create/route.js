@@ -27,7 +27,8 @@ async function getNextOrderSequence(datePrefix) {
 export async function POST(req) {
     await dbConnect();
     try {
-        const token = cookies().get("token")?.value;
+        const cookie = await cookies();
+        const token = cookie.get("token")?.value;
         if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -78,7 +79,7 @@ export async function POST(req) {
                 userId,
                 sellerId: orderData.sellerId,
                 items: orderData.items,
-                orderNumber: `C-${sequenceNumber}`,
+                orderNumber: `${datePrefix}-C-${sequenceNumber}`,
                 status: 'Pending',
                 upiCharges: upiCharges,
                 totalAmount: grandTotal, 

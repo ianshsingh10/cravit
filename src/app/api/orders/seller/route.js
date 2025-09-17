@@ -9,28 +9,27 @@ export async function GET() {
     try {
         const cookie = await cookies();
         const token = cookie.get("token")?.value;
-        if (!token) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const userId = decoded.id;
+        // Ensure the user is a seller
+        if (decoded.role !== 'seller') {
+            return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
+        }
+        const sellerId = decoded.id;
 
-        const orders = await Order.find({ userId })
-            .sort({ createdAt: -1 }) 
-            .limit(5)
+        const orders = await Order.find({ sellerId: sellerId })
+            .sort({ createdAt: -1 })
+            // Populate the customer's details from the User model
             .populate({
-                path: 'sellerId',
-                select: 'name'
+                path: 'userId',
+                select: 'name email'
             });
 
         return NextResponse.json({ orders });
 
     } catch (err) {
-        if (err.name === 'JsonWebTokenError') {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-        console.error("Error fetching user orders:", err);
+        console.error("Error fetching seller orders:", err);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

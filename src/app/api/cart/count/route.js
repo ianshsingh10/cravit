@@ -21,7 +21,6 @@ export async function GET() {
         return NextResponse.json({ count });
 
     } catch (err) {
-        // If token is invalid or another error occurs, return 0
         return NextResponse.json({ count: 0 });
     }
 }

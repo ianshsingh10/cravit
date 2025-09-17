@@ -28,13 +28,18 @@ const handler = NextAuth({
           existingUser = await User.create({
             name: fallbackName,
             email: email,
-            phoneNo: "", // optional
+            phoneNo: "",
             role: "user",
           });
         }
 
         const token = jwt.sign(
-          { id: existingUser._id },
+          {
+            id: existingUser._id,
+            name: existingUser.name,
+            email: existingUser.email,
+            role: existingUser.role,
+          },
           process.env.JWT_SECRET,
           { expiresIn: "1d" }
         );

@@ -20,7 +20,6 @@ export async function POST(req) {
 
   let user = await User.findOne({ email });
   if (!user) {
-    // Hash the password before storing
     const hashedPassword = await bcrypt.hash(password, 12);
     user = await User.create({ name, email, phoneNo, password: hashedPassword });
   }
