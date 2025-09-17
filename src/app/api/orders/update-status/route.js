@@ -20,7 +20,7 @@ export async function PUT(req) {
         const { orderId, status } = await req.json();
 
         // Validate that the status is a valid choice from your schema enum
-        const validStatuses = ['Pending', 'Accepted', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled'];
+        const validStatuses = ['Pending', 'Accepted', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled', 'Refunded'];
         if (!validStatuses.includes(status)) {
             return NextResponse.json({ error: "Invalid status value" }, { status: 400 });
         }

@@ -11,6 +11,8 @@ const StatusIndicator = ({ status }) => {
         'Out for Delivery': { icon: <Clock className="w-4 h-4 text-yellow-500" />, color: 'text-yellow-600 dark:text-yellow-400' },
         Pending: { icon: <Clock className="w-4 h-4 text-blue-500" />, color: 'text-blue-600 dark:text-blue-400' },
         Cancelled: { icon: <XCircle className="w-4 h-4 text-red-500" />, color: 'text-red-600 dark:text-red-400' },
+        Refunded: { icon: <CheckCircle className="w-4 h-4 text-green-500" />, color: 'text-green-600 dark:text-green-400' },
+
     };
     const { icon, color } = statusConfig[status] || {};
     return (
@@ -22,7 +24,7 @@ const StatusIndicator = ({ status }) => {
 
 // A sub-component for a single order card
 const SellerOrderCard = ({ order, onStatusChange, isUpdating }) => {
-    const validStatuses = ['Pending', 'Accepted', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled'];
+    const validStatuses = ['Pending', 'Accepted', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled', 'Refunded'];
     const isOrderUpdating = isUpdating === order._id;
 
     return (

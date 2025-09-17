@@ -17,7 +17,7 @@ const orderSchema = new mongoose.Schema({
     upiCharges: { type: Number, required: true, default: 0 },
     status: {
         type: String,
-        enum: ['Pending', 'Accepted', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled'],
+        enum: ['Pending', 'Accepted', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled', 'Refunded'],
         default: 'Pending'
     }
 }, { timestamps: true });
