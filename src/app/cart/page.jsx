@@ -257,7 +257,7 @@ export default function CartPage() {
                         <ShoppingCart className="w-20 h-20 text-gray-300 dark:text-gray-600 mx-auto" />
                         <h2 className="mt-6 text-2xl font-bold text-gray-900 dark:text-white">Your cart is empty</h2>
                         <p className="mt-2 text-gray-500 dark:text-gray-400">Looks like you haven't added anything to your cart yet.</p>
-                        <Link href="/browse" className="mt-6 inline-block bg-orange-500 text-white font-bold px-6 py-3 rounded-full hover:bg-orange-600 transition-all">
+                        <Link href="/" className="mt-6 inline-block bg-orange-500 text-white font-bold px-6 py-3 rounded-full hover:bg-orange-600 transition-all">
                             Start Shopping
                         </Link>
                     </div>
