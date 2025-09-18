@@ -4,9 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
-
-// Import the new components
-import { OrderHistoryCard } from "@/Components/user/OrderHistoryCard";
+import { OrderHistoryCard } from "@/Components/user/orders//OrderHistoryCard";
 import { ReviewsCard } from "@/Components/user/ReviewsCard";
 import { ProfileCard } from "@/Components/user/ProfileCard";
 

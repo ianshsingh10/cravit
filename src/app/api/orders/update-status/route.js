@@ -19,7 +19,6 @@ export async function PUT(req) {
 
         const { orderId, status } = await req.json();
 
-        // Validate that the status is a valid choice from your schema enum
         const validStatuses = ['Pending', 'Accepted', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled', 'Refunded'];
         if (!validStatuses.includes(status)) {
             return NextResponse.json({ error: "Invalid status value" }, { status: 400 });
@@ -28,15 +27,14 @@ export async function PUT(req) {
         const order = await Order.findById(orderId);
         if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
-        // Security check: Make sure the seller owns this order
         if (order.sellerId.toString() !== sellerId) {
             return NextResponse.json({ error: "Forbidden: You do not own this order" }, { status: 403 });
         }
 
         order.status = status;
+        order.statusHistory.push({ status: status });
         await order.save();
 
-        // Repopulate user details before sending back for UI consistency
         await order.populate({ path: 'userId', select: 'name email' });
 
         return NextResponse.json(order);

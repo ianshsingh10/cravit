@@ -1,5 +1,10 @@
 import mongoose from 'mongoose';
 
+const statusHistorySchema = new mongoose.Schema({
+    status: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now }
+}, { _id: false });
+
 const orderItemSchema = new mongoose.Schema({
     itemId: { type: mongoose.Schema.Types.ObjectId, ref: 'Item', required: true },
     itemName: { type: String, required: true },
@@ -19,7 +24,8 @@ const orderSchema = new mongoose.Schema({
         type: String,
         enum: ['Pending', 'Accepted', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled', 'Refunded'],
         default: 'Pending'
-    }
+    },
+    statusHistory: [statusHistorySchema]
 }, { timestamps: true });
 
 export default mongoose.models.Order || mongoose.model("Order", orderSchema);

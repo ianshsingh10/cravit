@@ -89,6 +89,7 @@ export async function POST(req) {
                 items: orderData.items,
                 orderNumber: `${datePrefix}-C-${sequenceNumber}`,
                 status: 'Pending',
+                statusHistory: [{ status: 'Pending' }],
                 upiCharges: upiCharges,
                 totalAmount: grandTotal, 
             });

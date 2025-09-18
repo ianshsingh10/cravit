@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  LogIn,
   LogOut,
   LayoutDashboard,
   UserCog,
@@ -270,7 +269,7 @@ const MobileMenu = ({ user, isOpen, onClose, onSignOut, cartCount }) => {
               <Link href="/" onClick={onClose}><Image src="/cravit-logo.jpg" alt="Logo" width={48} height={48} className="rounded-full"/></Link>
               <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><X size={24} className="text-gray-800 dark:text-gray-200" /></button>
             </div>
-            <div className="flex-grow overflow-y-auto">
+            {user?.role==="user" && (<div className="flex-grow overflow-y-auto">
               <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase px-4 mb-2">Restaurants</h3>
               <div className="space-y-1">
                 {isLoading ? (
@@ -283,7 +282,7 @@ const MobileMenu = ({ user, isOpen, onClose, onSignOut, cartCount }) => {
                   <div className="px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400">No sellers found.</div>
                 )}
               </div>
-            </div>
+              </div>)}
             <div className="border-t dark:border-gray-700 pt-6 mt-6">
               {user ? (
                 <div className="space-y-2">
@@ -349,7 +348,7 @@ export default function DynamicHeader() {
               <Link href="/" aria-label="Home">
                 <Image src="/cravit-logo.jpg" alt="Logo" width={48} height={48} className="rounded-full shadow-sm" priority/>
               </Link>
-              <SellersDropdown />
+              {user?.role === "user" && <SellersDropdown />}
             </div>
             <div className="flex items-center gap-4">
               <div className="hidden sm:flex items-center gap-4">

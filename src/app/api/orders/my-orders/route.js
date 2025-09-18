@@ -18,7 +18,6 @@ export async function GET() {
 
         const orders = await Order.find({ userId })
             .sort({ createdAt: -1 }) 
-            .limit(5)
             .populate({
                 path: 'sellerId',
                 select: 'name'
