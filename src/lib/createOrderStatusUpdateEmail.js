@@ -10,7 +10,7 @@ export const createOrderStatusUpdateEmail = (userName, orderId, newStatus) => {
 
   const message = messages[newStatus] || `Your order's status is now: ${newStatus}.`;
   const year = new Date().getFullYear();
-  const shortOrderId = orderId.slice(-8).toUpperCase();
+  const shortOrderId = orderId;
 
   return `
   <!DOCTYPE html>
