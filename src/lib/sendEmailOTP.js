@@ -1,20 +1,35 @@
+// lib/sendEmailOTP.js
+
 import nodemailer from "nodemailer";
+import { createOtpEmailHtml } from "./createOtpEmailHtml";
 
-export const sendEmailOtp = async (to, otp) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.MAIL_USER,
-      pass: process.env.MAIL_PASS,
-    },
-  });
+export async function sendEmailOtp(email, otp) {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
-  const info = await transporter.sendMail({
-    from: process.env.MAIL_USER,
-    to,
-    subject: "Your OTP Code",
-    text: `Your OTP to login to craVIT is ${otp}`,
-  });
+    const htmlContent = createOtpEmailHtml(otp);
 
-  return info;
-};
+    const mailOptions = {
+      from: `"Your App Name" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Your OTP for Verification",
+      html: htmlContent,
+      text: `Your OTP is: ${otp}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    
+    console.log("OTP email sent successfully to:", email);
+    return true;
+
+  } catch (error) {
+    console.error("Error sending OTP email:", error);
+    return false;
+  }
+}
