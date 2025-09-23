@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { MenuItemCard } from "@/components/user/MenuItemCard"; 
+import { MenuItemCard } from "@/Components/user/MenuItemCard"; 
 
 const OutletSectionSkeleton = () => (
     <div className="space-y-12">
