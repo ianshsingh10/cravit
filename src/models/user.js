@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-  phoneNo: { type: String, default: "" }, // ⛳️ use String for phone numbers
+  phoneNo: { type: String, default: "" },
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, default: "" }, // Optional - Google OAuth users won't have passwords
+  password: { type: String, default: "" },
   role: {
     type: String,
     enum: ["user", "admin", "seller"],

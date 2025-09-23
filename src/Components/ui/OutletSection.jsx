@@ -1,66 +1,99 @@
 "use client";
 
-import React from "react";
-import Image from "next/image";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import { MenuItemCard } from "@/components/user/MenuItemCard"; 
 
-const outlets = [
-  { name: "Mayuri (AB1)", image: "https://placehold.co/400x300/FFF4E6/333333?text=Mayuri" },
-  { name: "Mayuri (AB2)", image: "https://placehold.co/400x300/FFF4E6/333333?text=Mayuri" },
-  { name: "Mayuri (Canteen)", image: "https://placehold.co/400x300/FFF4E6/333333?text=Mayuri" },
-  { name: "Bistro by Safal", image: "https://placehold.co/400x300/E6F4FF/333333?text=Bistro" },
-  { name: "Safal (Canteen)", image: "https://placehold.co/400x300/E6F4FF/333333?text=Safal" },
-  { name: "AB Dakshin", image: "https://placehold.co/400x300/FFE6E6/333333?text=Dakshin" },
-  { name: "UB (UnderBelly)", image: "https://placehold.co/400x300/F0E6FF/333333?text=UB" },
-];
+const OutletSectionSkeleton = () => (
+    <div className="space-y-12">
+        {[...Array(2)].map((_, i) => (
+            <div key={i}>
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-6 animate-pulse"></div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                    {[...Array(4)].map((_, j) => (
+                        <div key={j} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden animate-pulse">
+                            <div className="h-40 w-full bg-gray-200 dark:bg-gray-700"></div>
+                            <div className="p-4">
+                                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        ))}
+    </div>
+);
+
 
 export default function OutletSection() {
-  return (
-    <section className="py-24 bg-gray-50 dark:bg-gray-900/50">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
-            Our Partner Outlets
-          </h2>
-          <p className="mt-3 text-lg text-gray-600 dark:text-gray-400">
-            Your favorite canteens, all in one place.
-          </p>
-        </motion.div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {outlets.map((outlet, index) => (
-             <motion.div
-                key={outlet.name + index}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2"
-            >
-              <div className="relative h-48 w-full">
-                <Image
-                  src={outlet.image}
-                  alt={`Image of ${outlet.name}`}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  unoptimized={true}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-              </div>
-              <div className="p-5">
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white">
-                  {outlet.name}
-                </h3>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+    const [outlets, setOutlets] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchOutlets = async () => {
+            setIsLoading(true);
+            try {
+                const res = await fetch('/api/outlets');
+                if (!res.ok) throw new Error("Failed to load outlets");
+                const data = await res.json();
+                setOutlets(data.filter(outlet => outlet.items && outlet.items.length > 0));
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchOutlets();
+    }, []);
+
+    return (
+        <section className="py-24 bg-gray-50 dark:bg-gray-900/50">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                  viewport={{ once: true }}
+                  className="text-center mb-16"
+                >
+                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                        Featured Items
+                    </h2>
+                    <p className="mt-3 text-lg text-gray-600 dark:text-gray-400">
+                        A taste of what our partner outlets have to offer.
+                    </p>
+                </motion.div>
+                
+                {isLoading ? (
+                    <OutletSectionSkeleton />
+                ) : (
+                    <div className="space-y-16">
+                        {outlets.map((outlet) => (
+                            <div key={outlet._id}>
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-bold text-gray-800 dark:text-white">
+                                        {outlet.name}
+                                    </h3>
+                                    <Link 
+                                        href={`/seller/${outlet.name.toLowerCase().replace(/\s+/g, "-")}`}
+                                        className="flex items-center gap-2 text-sm font-semibold text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300 transition-all"
+                                    >
+                                        View All Items <ArrowRight size={14} />
+                                    </Link>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                                    {outlet.items.map(item => (
+                                        <MenuItemCard key={item._id} item={item} />
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </section>
+    );
 }

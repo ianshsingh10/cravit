@@ -23,7 +23,6 @@ export const MenuItemCard = ({ item }) => {
         setOrderType('Dine-in');
     };
 
-    // ✅ This function now calls the backend API
     const handleConfirmAddToCart = async () => {
         setIsAdding(true);
         try {
@@ -33,14 +32,13 @@ export const MenuItemCard = ({ item }) => {
                 body: JSON.stringify({
                     itemId: item._id,
                     quantity: quantity,
-                    service: orderType.toLowerCase() // 'Dine-in' -> 'dine-in'
+                    service: orderType.toLowerCase()
                 })
             });
 
             const result = await res.json();
 
             if (!res.ok) {
-                // Show error message from the backend
                 alert(`Error: ${result.error || 'Could not add item to cart.'}`);
             } else {
                 alert(`${quantity} x ${item.itemName} (${orderType}) added successfully!`);
@@ -57,7 +55,6 @@ export const MenuItemCard = ({ item }) => {
 
     return (
         <>
-            {/* ... Item Card JSX (no changes here) ... */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden flex flex-col group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <div className="relative w-full h-32 sm:h-40">
                     <Image
@@ -108,7 +105,6 @@ export const MenuItemCard = ({ item }) => {
                                 <X size={20} />
                             </button>
 
-                            {/* ... Modal content JSX (no changes here) ... */}
                             <div>
                                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{item.itemName}</h2>
                                 <p className="text-lg font-semibold text-orange-600 dark:text-orange-400">₹{item.price}</p>
@@ -157,7 +153,7 @@ export const MenuItemCard = ({ item }) => {
 
                             <button 
                                 onClick={handleConfirmAddToCart}
-                                disabled={isAdding} // Disable button while loading
+                                disabled={isAdding} 
                                 className="w-full bg-orange-500 text-white font-bold py-4 rounded-xl text-lg hover:bg-orange-600 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:bg-orange-400 disabled:cursor-not-allowed flex justify-center items-center"
                             >
                                 {isAdding ? (

@@ -1,13 +1,12 @@
 const mongoose = require('mongoose');
 
 const reviewSchema = new mongoose.Schema({
-  reviewer: { type: String },
-  comment: { type: String },
+  reviewerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   rating: { type: Number, min: 1, max: 5 }
 }, { timestamps: true });
 
 const itemSchema = new mongoose.Schema({
-  sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', required: true },
+  sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   sellerName: { type: String, required: true },
   itemName: { type: String, required: true },
   price: { type: Number, required: true },
