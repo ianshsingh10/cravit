@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ShoppingBag, ArrowRight, RefreshCw, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import Link from "next/link";
+import { ShoppingBag, ArrowRight, RefreshCw, Loader2, ChevronDown, ChevronUp, Star } from "lucide-react";
 import { DashboardCard } from "@/Components/ui/DashboardCard";
 import { AnimatePresence } from "framer-motion";
 import useCartStore from '@/Components/stores/cartStore';
+
 import { OrderDetailsModal } from "./OrderDetailsModal";
 import { StatusIndicator } from "./StatusIndicator";
 import { OrderSkeleton } from "./OrderSkeleton";
@@ -75,7 +77,6 @@ export const OrderHistoryCard = () => {
             });
             const result = await res.json();
             if (!res.ok) throw new Error(result.error || 'Failed to cancel order.');
-
             setOrders(currentOrders => currentOrders.map(o => o._id === orderId ? result.order : o));
             handleCloseDetails();
         } catch (err) {
@@ -85,9 +86,27 @@ export const OrderHistoryCard = () => {
         }
     };
 
+    const handleReviewSubmit = async ({ itemId, rating }) => {
+        setIsActionLoading(true);
+        try {
+            const res = await fetch('/api/items/review', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itemId, rating })
+            });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error || "Failed to submit review.");
+            alert("Thank you for your review!");
+        } catch (err) {
+            alert(`Review Error: ${err.message}`);
+        } finally {
+            setIsActionLoading(false);
+        }
+    };
+
     const renderContent = () => {
         if (isLoading) {
-            return <div className="space-y-3"><OrderSkeleton /><OrderSkeleton /><OrderSkeleton /></div>;
+            return <OrderSkeleton count={5} />;
         }
         if (error) {
             return <p className="text-red-500 text-center py-8">{error}</p>;
@@ -114,9 +133,15 @@ export const OrderHistoryCard = () => {
                                 <button onClick={() => handleReOrder(order._id)} disabled={isActionLoading} className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition disabled:opacity-50">
                                     {isActionLoading ? <Loader2 className="w-3 h-3 animate-spin"/> : <RefreshCw size={12} />} Re-Order
                                 </button>
-                                <button onClick={() => handleOpenDetails(order)} className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition">
-                                    View Details <ArrowRight size={12} />
-                                </button>
+                                {order.status === 'Delivered' ? (
+                                    <button onClick={() => handleOpenDetails(order)} className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition">
+                                        <Star size={12} /> Rate & Review
+                                    </button>
+                                ) : (
+                                    <button onClick={() => handleOpenDetails(order)} className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition">
+                                        View Details <ArrowRight size={12} />
+                                    </button>
+                                )}
                            </div>
                         </div>
                     </div>
@@ -141,12 +166,14 @@ export const OrderHistoryCard = () => {
                     </div>
                 )}
             </DashboardCard>
+
             <AnimatePresence>
                 {selectedOrder && 
                     <OrderDetailsModal 
                         order={selectedOrder} 
                         onClose={handleCloseDetails}
                         onCancelOrder={handleCancelOrder}
+                        onReviewSubmit={handleReviewSubmit}
                         isActionLoading={isActionLoading}
                     />}
             </AnimatePresence>
