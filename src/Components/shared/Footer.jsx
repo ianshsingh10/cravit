@@ -5,10 +5,8 @@ export default function HomeFooter() {
   return (
     <footer className="bg-slate-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans border-t border-gray-200 dark:border-gray-800">
       <div className="container mx-auto px-6 lg:px-8 py-16">
-        {/* Main footer grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12 text-center md:text-left">
-          {/* Column 1: Branding and About */}
-          <div className="space-y-4 flex flex-col items-center md:items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-4 sm:grid-cols-2 gap-12 mb-12 text-center sm:text-left">
+          <div className="space-y-4 flex flex-col items-center sm:items-start">
             <div className="flex items-center gap-3">
               <Image
                 src="/cravit-logo.jpg"
@@ -17,8 +15,8 @@ export default function HomeFooter() {
                 height={52}
                 className="rounded-full"
               />
-              <h4 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                craVIT by Beyond Infinity
+              <h4 className="text-xl font-bold text-gray-800 dark:text-gray-100">
+                craVIT by Beyond Infinity Technologies
               </h4>
             </div>
             <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed max-w-xs">
@@ -28,13 +26,53 @@ export default function HomeFooter() {
             </p>
           </div>
 
-          {/* Column 2: Contact Us */}
-          <div className="space-y-4 flex flex-col items-center md:items-start">
+          <div className="space-y-4 flex flex-col items-center sm:items-start">
+            <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200 tracking-wide">
+              Policys
+            </h3>
+            <div className="flex space-x-2">
+              <ul>
+                <li>
+                  <a
+                    href="/policy/privacy-policy"
+                    className="hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-300"
+                  >
+                    Privacy Policy
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/policy/terms-and-conditions"
+                    className="hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-300"
+                  >
+                    Terms & Conditions
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/policy/cancellation-and-refund-policy"
+                    className="hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-300"
+                  >
+                    Cancellation & Refund Policy
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/policy/shipping-and-delivery"
+                    className="hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-300"
+                  >
+                    Shipping & Delivery Policy
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="space-y-4 flex flex-col items-center sm:items-start">
             <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200 tracking-wide">
               Contact Us
             </h3>
             <ul className="space-y-3 text-gray-500 dark:text-gray-400">
-              <li className="flex items-center justify-center md:justify-start gap-3 group">
+              <li className="flex items-center justify-center sm:justify-start gap-3 group">
                 <Mail
                   size={18}
                   className="text-orange-500 flex-shrink-0 group-hover:scale-110 transition-transform"
@@ -46,7 +84,7 @@ export default function HomeFooter() {
                   sp.cravit@gmail.com
                 </a>
               </li>
-              <li className="flex items-center justify-center md:justify-start gap-3 group">
+              <li className="flex items-center justify-center sm:justify-start gap-3 group">
                 <Phone
                   size={18}
                   className="text-orange-500 flex-shrink-0 group-hover:scale-110 transition-transform"
@@ -61,8 +99,7 @@ export default function HomeFooter() {
             </ul>
           </div>
 
-          {/* Column 3: Follow Us */}
-          <div className="space-y-4 flex flex-col items-center md:items-start">
+          <div className="space-y-4 flex flex-col items-center sm:items-start">
             <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200 tracking-wide">
               Follow Us
             </h3>
@@ -92,11 +129,11 @@ export default function HomeFooter() {
           </div>
         </div>
 
-        {/* Bottom Bar: Copyright */}
         <div className="pt-8 border-t border-gray-200 dark:border-gray-800 text-center text-gray-500 dark:text-gray-500 text-sm">
           <p>
-            &copy; {new Date().getFullYear()} craVIT. All Rights Reserved By Beyond Infinity.
-            Designed with an appetite for excellence. 🍕
+            &copy; {new Date().getFullYear()} craVIT. All Rights Reserved By
+            Beyond Infinity Technologies. Designed with an appetite for
+            excellence. 🍕
           </p>
         </div>
       </div>

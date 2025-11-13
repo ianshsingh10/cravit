@@ -3,6 +3,7 @@ import DynamicHeader from "@/Components/shared/Navbar";
 import HomeFooter from "@/Components/shared/Footer";
 import "./globals.css";
 import{ Providers } from "@/Components/shared/Provider";
+import Script from "next/script";
 
 
 const geistSans = Geist({
@@ -30,7 +31,8 @@ export default function RootLayout({ children }) {
         <Providers>
           {children}
         </Providers>
-        <HomeFooter />        
+        <HomeFooter />
+        <Script src="https://checkout.razorpay.com/v1/checkout.js"/>     
       </body>
     </html>
   );
