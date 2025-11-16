@@ -17,10 +17,11 @@ import {
 import { useRouter, usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 
+// Assuming these stores exist and work as intended
 import { useUser } from "@/Components/stores/useUser";
-import useCartStore from '@/Components/stores/cartStore';
+import useCartStore from "@/Components/stores/cartStore";
 
-
+// --- Reusable ClickOutside Hook (Unchanged) ---
 const useClickOutside = (ref, callback) => {
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -31,36 +32,30 @@ const useClickOutside = (ref, callback) => {
   }, [ref, callback]);
 };
 
-const SellersDropdown = () => {
+// --- [IMPROVED] SellersDropdown Component ---
+// Now receives sellers and loading state as props instead of fetching itself.
+// Also includes active state highlighting.
+const SellersDropdown = ({ sellers, isLoading }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [sellers, setSellers] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const dropdownRef = useRef(null);
+  const pathname = usePathname();
+
+  // Check if the current path is a seller's page
+  const isActive = pathname.startsWith("/seller/");
 
   useClickOutside(dropdownRef, () => setIsOpen(false));
-
-  useEffect(() => {
-    const fetchSellers = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch("/api/seller");
-        if (!response.ok) throw new Error("Failed to fetch sellers");
-        const data = await response.json();
-        setSellers(data);
-      } catch (error) {
-        console.error("Error fetching sellers:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchSellers();
-  }, []);
 
   return (
     <div className="relative hidden md:block" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors font-semibold text-gray-800 dark:text-gray-200"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        className={`flex items-center gap-2 px-4 py-2.5 rounded-full transition-colors font-semibold ${
+          isActive
+            ? "bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
+            : "text-gray-800 dark:text-gray-200 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400"
+        }`}
       >
         <Building size={18} />
         <span>Restaurants</span>
@@ -78,7 +73,7 @@ const SellersDropdown = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute left-0 mt-3 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-2 ring-1 ring-black/5 dark:ring-white/10 z-20"
+            className="absolute left-0 mt-3 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-2 ring-1 ring-black/5 dark:ring-white/10 z-20 border border-gray-100 dark:border-gray-700"
           >
             {isLoading ? (
               <div className="px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400">Loading...</div>
@@ -88,7 +83,7 @@ const SellersDropdown = () => {
                   key={seller._id}
                   href={`/seller/${seller.name.toLowerCase().replace(/\s+/g, "-")}`}
                   onClick={() => setIsOpen(false)}
-                  className="block px-4 py-2.5 text-sm font-semibold text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="block px-4 py-2.5 text-sm font-semibold text-gray-800 dark:text-gray-200 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400"
                 >
                   {seller.name}
                 </Link>
@@ -103,8 +98,14 @@ const SellersDropdown = () => {
   );
 };
 
+// --- [IMPROVED] CartButton Component ---
+// Added branded hover state
 const CartButton = ({ count }) => (
-  <Link href="/cart" className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+  <Link 
+    href="/cart" 
+    className="relative p-2 rounded-full hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+    aria-label={`View cart, ${count} items`}
+  >
     <ShoppingCart size={24} className="text-gray-700 dark:text-gray-300"/>
     {count > 0 && (
       <AnimatePresence>
@@ -113,7 +114,7 @@ const CartButton = ({ count }) => (
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.5, opacity: 0 }}
           transition={{ type: "spring", stiffness: 500, damping: 20 }}
-          className="absolute top-0 right-0 block h-5 w-5 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center ring-2 ring-white dark:ring-gray-900"
+          className="absolute top-0 right-0 h-5 w-5 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center ring-2 ring-white dark:ring-gray-900"
         >
           {count}
         </motion.span>
@@ -122,20 +123,36 @@ const CartButton = ({ count }) => (
   </Link>
 );
 
-const NavLink = ({ href, icon, children }) => (
-    <Link href={href} className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors font-semibold text-gray-800 dark:text-gray-200">
-        {icon}
-        <span>{children}</span>
-    </Link>
-);
+// --- [IMPROVED] NavLink Component ---
+// Now includes active state logic
+const NavLink = ({ href, icon, children }) => {
+  const pathname = usePathname();
+  const isActive = pathname === href;
 
+  return (
+    <Link 
+      href={href} 
+      className={`hidden md:flex items-center gap-2 px-4 py-2.5 rounded-full transition-colors font-semibold ${
+        isActive
+          ? "bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
+          : "text-gray-800 dark:text-gray-200 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400"
+      }`}
+    >
+      {icon}
+      <span>{children}</span>
+    </Link>
+  );
+};
+
+// --- [IMPROVED] ProfileButton Component ---
+// Added branded hover state
 const ProfileButton = React.forwardRef(({ user, isOpen, onClick }, ref) => (
   <button
     ref={ref}
     aria-haspopup="menu"
     aria-expanded={isOpen}
     onClick={onClick}
-    className="flex items-center gap-2 group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 rounded-full p-1 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+    className="flex items-center gap-2 group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 rounded-full p-1 transition-colors hover:bg-orange-50 dark:hover:bg-orange-900/20"
   >
     <div className="relative">
       <Image
@@ -151,13 +168,15 @@ const ProfileButton = React.forwardRef(({ user, isOpen, onClick }, ref) => (
 ));
 ProfileButton.displayName = "ProfileButton";
 
+// --- [IMPROVED] MenuItem Component ---
+// Added branded hover state for non-destructive items
 const MenuItem = ({ icon, children, onClick, isDestructive = false }) => (
   <button
     onClick={onClick}
     className={`flex w-full px-3 py-2.5 gap-3 text-sm items-center font-semibold transition rounded-lg ${
       isDestructive
         ? "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-        : "text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+        : "text-gray-800 dark:text-gray-200 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400"
     }`}
     role="menuitem"
   >
@@ -166,6 +185,7 @@ const MenuItem = ({ icon, children, onClick, isDestructive = false }) => (
   </button>
 );
 
+// --- UserDropdownMenu Component (Unchanged structure, uses improved MenuItem) ---
 const UserDropdownMenu = ({ user, onSignOut }) => {
   const router = useRouter();
   return (
@@ -174,7 +194,7 @@ const UserDropdownMenu = ({ user, onSignOut }) => {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -10, scale: 0.95 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
-      className="absolute right-0 mt-3 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl py-2 ring-1 ring-black/5 dark:ring-white/10 z-20"
+      className="absolute right-0 mt-3 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl py-2 ring-1 ring-black/5 dark:ring-white/10 z-20 border border-gray-100 dark:border-gray-700"
       role="menu"
     >
       <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3">
@@ -212,6 +232,8 @@ const UserDropdownMenu = ({ user, onSignOut }) => {
   );
 };
 
+// --- [IMPROVED] GuestActions Component ---
+// Added branded hover state to Login
 const GuestActions = () => (
   <div className="flex items-center gap-2">
     <Link href="/user/login" className="text-gray-700 dark:text-gray-300 font-semibold px-4 py-2.5 hover:text-orange-600 dark:hover:text-orange-400 rounded-full transition-colors hidden sm:block">
@@ -223,32 +245,15 @@ const GuestActions = () => (
   </div>
 );
 
+// --- AuthSkeleton Component (Unchanged) ---
 const AuthSkeleton = () => (
   <div className="h-11 w-28 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
 );
 
-const MobileMenu = ({ user, isOpen, onClose, onSignOut, cartCount }) => {
+// --- [IMPROVED] MobileMenu Component ---
+// Now receives sellers and loading state as props
+const MobileMenu = ({ user, isOpen, onClose, onSignOut, cartCount, sellers, isLoading }) => {
   const router = useRouter();
-  const [sellers, setSellers] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const fetchSellers = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch("/api/seller");
-        if (!response.ok) throw new Error("Failed to fetch sellers");
-        const data = await response.json();
-        setSellers(data);
-      } catch (error) {
-        console.error("Error fetching sellers:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchSellers();
-  }, [isOpen]);
 
   return (
     <AnimatePresence>
@@ -259,38 +264,54 @@ const MobileMenu = ({ user, isOpen, onClose, onSignOut, cartCount }) => {
             transition={{ duration: 0.3 }}
             className="fixed inset-0 bg-black/40 z-40 md:hidden"
             onClick={onClose}
+            aria-hidden="true"
           />
           <motion.div
             initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 400, damping: 40 }}
             className="fixed top-0 right-0 h-full w-full max-w-sm bg-white dark:bg-gray-800 shadow-2xl z-50 p-6 flex flex-col"
+            role="dialog"
+            aria-modal="true"
           >
             <div className="flex justify-between items-center mb-8">
               <Link href="/" onClick={onClose}><Image src="/cravit-logo.jpg" alt="Logo" width={48} height={48} className="rounded-full"/></Link>
-              <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><X size={24} className="text-gray-800 dark:text-gray-200" /></button>
+              <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Close menu">
+                <X size={24} className="text-gray-800 dark:text-gray-200" />
+              </button>
             </div>
-            {user?.role==="user" && (<div className="flex-grow overflow-y-auto">
-              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase px-4 mb-2">Restaurants</h3>
-              <div className="space-y-1">
-                {isLoading ? (
-                  <div className="px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400">Loading...</div>
-                ) : sellers.length > 0 ? (
-                  sellers.map((seller) => (
-                    <Link key={seller._id} href={`/seller/${seller.name.toLowerCase().replace(/\s+/g, "-")}`} onClick={onClose} className="block px-4 py-2.5 text-md font-medium text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">{seller.name}</Link>
-                  ))
-                ) : (
-                  <div className="px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400">No sellers found.</div>
-                )}
+            
+            {user?.role==="user" && (
+              <div className="flex-grow overflow-y-auto">
+                <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase px-4 mb-2">Restaurants</h3>
+                <div className="space-y-1">
+                  {isLoading ? (
+                    <div className="px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400">Loading...</div>
+                  ) : sellers.length > 0 ? (
+                    sellers.map((seller) => (
+                      <Link 
+                        key={seller._id} 
+                        href={`/seller/${seller.name.toLowerCase().replace(/\s+/g, "-")}`} 
+                        onClick={onClose} 
+                        className="block px-4 py-2.5 text-md font-medium text-gray-800 dark:text-gray-200 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400"
+                      >
+                        {seller.name}
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400">No sellers found.</div>
+                  )}
+                </div>
               </div>
-              </div>)}
+            )}
+
             <div className="border-t dark:border-gray-700 pt-6 mt-6">
               {user ? (
                 <div className="space-y-2">
                   {user.role === 'user' && (
-                     <MenuItem icon={<div className="relative"><ShoppingCart size={18} />{cartCount > 0 && (<span className="absolute -top-1 -right-2 block h-4 w-4 rounded-full bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center">{cartCount}</span>)}</div>} onClick={() => { onClose(); router.push("/cart"); }}>My Cart</MenuItem>
+                      <MenuItem icon={<div className="relative"><ShoppingCart size={18} />{cartCount > 0 && (<span className="absolute -top-1 -right-2 h-4 w-4 rounded-full bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center">{cartCount}</span>)}</div>} onClick={() => { onClose(); router.push("/cart"); }}>My Cart</MenuItem>
                   )}
                   {user.role === 'seller' && (
-                     <MenuItem icon={<Package size={18} />} onClick={() => { onClose(); router.push("/seller/orders"); }}>Received Orders</MenuItem>
+                      <MenuItem icon={<Package size={18} />} onClick={() => { onClose(); router.push("/seller/orders"); }}>Received Orders</MenuItem>
                   )}
                   <MenuItem icon={<LayoutDashboard size={18} />} onClick={() => { onClose(); router.push(user?.role === "seller" ? "/seller/dashboard" : "/user/dashboard"); }}>Dashboard</MenuItem>
                   <MenuItem icon={<UserCog size={18} />} onClick={() => { onClose(); router.push("/user/profile"); }}>Edit Profile</MenuItem>
@@ -310,17 +331,48 @@ const MobileMenu = ({ user, isOpen, onClose, onSignOut, cartCount }) => {
   );
 };
 
+// --- [IMPROVED] Main DynamicHeader Component ---
+// Now fetches sellers and passes data to children
 export default function DynamicHeader() {
-  const { user, setUser, isLoading } = useUser();
+  const { user, setUser, isLoading: isUserLoading } = useUser();
   const { count: cartCount, fetchCount } = useCartStore();
   
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // --- [NEW] Seller state lifted to parent ---
+  const [sellers, setSellers] = useState([]);
+  const [isSellerLoading, setIsSellerLoading] = useState(true);
+
   const dropdownRef = useRef(null);
   const pathname = usePathname();
 
   useClickOutside(dropdownRef, () => setDropdownOpen(false));
 
+  // --- [NEW] Fetch sellers once on header mount if user is a 'user' ---
+  useEffect(() => {
+    if (user && user.role === 'user') {
+      const fetchSellers = async () => {
+        setIsSellerLoading(true);
+        try {
+          const response = await fetch("/api/seller");
+          if (!response.ok) throw new Error("Failed to fetch sellers");
+          const data = await response.json();
+          setSellers(data);
+        } catch (error) {
+          console.error("Error fetching sellers:", error);
+        } finally {
+          setIsSellerLoading(false);
+        }
+      };
+      fetchSellers();
+    } else {
+      // Not a 'user', no need to load sellers
+      setIsSellerLoading(false);
+    }
+  }, [user]); // Re-fetch if user changes
+
+  // Fetch cart count
   useEffect(() => {
     if (user && user.role === 'user') {
       fetchCount();
@@ -335,7 +387,7 @@ export default function DynamicHeader() {
       setUser(null);
       setDropdownOpen(false);
       setMobileMenuOpen(false);
-      window.location.href = "/";
+      window.location.href = "/"; // Hard refresh to clear all state
     }
   };
 
@@ -344,15 +396,20 @@ export default function DynamicHeader() {
       <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg sticky top-0 z-30 border-b border-gray-200/80 dark:border-gray-700/80">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-3 min-h-[72px]">
+            {/* --- Left Side: Logo & Restaurant Nav --- */}
             <div className="flex items-center gap-4">
               <Link href="/" aria-label="Home">
                 <Image src="/cravit-logo.jpg" alt="Logo" width={48} height={48} className="rounded-full shadow-sm" priority/>
               </Link>
-              {user?.role === "user" && <SellersDropdown />}
+              {user?.role === "user" && (
+                <SellersDropdown sellers={sellers} isLoading={isSellerLoading} />
+              )}
             </div>
+
+            {/* --- Right Side: Actions & Profile --- */}
             <div className="flex items-center gap-4">
               <div className="hidden sm:flex items-center gap-4">
-                {isLoading ? (
+                {isUserLoading ? (
                   <AuthSkeleton />
                 ) : user ? (
                   <>
@@ -375,19 +432,29 @@ export default function DynamicHeader() {
                   <GuestActions />
                 )}
               </div>
-              <button className="p-2 md:hidden -mr-2" onClick={() => setMobileMenuOpen(true)}>
+              
+              {/* --- Mobile Menu Button --- */}
+              <button 
+                className="p-2 md:hidden -mr-2" 
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Open menu"
+              >
                 <Menu size={24} className="text-gray-800 dark:text-gray-200" />
               </button>
             </div>
           </div>
         </div>
       </header>
+
+      {/* --- Mobile Menu Component --- */}
       <MobileMenu
         user={user}
         isOpen={isMobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
         onSignOut={handleSignOut}
         cartCount={cartCount}
+        sellers={sellers}
+        isLoading={isSellerLoading}
       />
     </>
   );
