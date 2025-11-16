@@ -386,4 +386,4 @@ export default function SellerPage() {
       </div>
     </div>
   );
-}
+} 
