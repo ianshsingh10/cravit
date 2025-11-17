@@ -1,10 +1,7 @@
 "use circuit";
 
 import { useState, useEffect } from "react";
-import { 
-  Search, Pizza, Coffee, GlassWater, Utensils,
-  Sandwich, Soup, Croissant, Drumstick, Star
-} from "lucide-react";
+import { Search, Wheat, Coffee, Carrot, Soup, Cookie, Utensils, Drumstick } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const restaurantImages = [
@@ -15,24 +12,24 @@ const restaurantImages = [
 
 const suggestions = {
   morning: [
-    { text: "Coffee", icon: <Coffee size={18} /> },
-    { text: "Breakfast", icon: <Croissant size={18} /> },
-    { text: "Sandwich", icon: <Sandwich size={18} /> },
+    { text: "Idli", icon: <Soup size={18} /> },
+    { text: "Dosa", icon: <Wheat size={18} /> },
+    { text: "Tea", icon: <Coffee size={18} /> },
   ],
   lunch: [
-    { text: "Thali", icon: <Utensils size={18} /> },
-    { text: "Biryani", icon: <Drumstick size={18} /> },
-    { text: "Popular", icon: <Star size={18} /> },
+    { text: "Biryani", icon: <Soup size={18} /> },
+    { text: "Fried Rice", icon: <Carrot size={18} /> },
+    { text: "Noodles", icon: <Soup size={18} /> },
   ],
   evening: [
-    { text: "Samosa", icon: <Pizza size={18} /> },
-    { text: "Juice", icon: <GlassWater size={18} /> },
+    { text: "Samosa", icon: <Cookie size={18} /> },
     { text: "Coffee", icon: <Coffee size={18} /> },
+    { text: "Sandwich", icon: <Utensils size={18} /> },
   ],
   dinner: [
-    { text: "Noodles", icon: <Soup size={18} /> },
-    { text: "Paneer", icon: <Utensils size={18} /> },
-    { text: "Popular", icon: <Star size={18} /> },
+    { text: "Chicken", icon: <Drumstick size={18} /> },
+    { text: "Paneer", icon: <Soup size={18} /> },
+    { text: "Naan", icon: <Wheat size={18} /> },
   ],
 };
 
@@ -48,7 +45,6 @@ const getSuggestions = () => {
     return suggestions.dinner;
   }
 };
-
 
 const BackgroundCarousel = ({ activeIndex }) => {
   return (
