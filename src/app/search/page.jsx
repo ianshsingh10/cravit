@@ -3,11 +3,10 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Loader2, AlertTriangle, Soup, Search, Star, ShoppingCart, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
-// Import the cart store
 import useCartStore from "@/Components/stores/cartStore";
 
 const Image = ({ src, alt, fill, className, priority, ...props }) => {
-  const style = fill 
+  const style = fill
     ? { objectFit: "cover", position: "absolute", height: "100%", width: "100%", inset: 0 }
     : {};
   return <img src={src} alt={alt} className={className} style={style} {...props} />;
@@ -19,31 +18,25 @@ const SearchItemCard = ({ item, onAddToCart }) => {
   const handleClick = async () => {
     setIsAdding(true);
     try {
-      // Call the async function from props
-      // The parent (SearchAllPage) will handle notifications
-      await onAddToCart(item); 
+      await onAddToCart(item);
     } catch (error) {
       console.error("Failed to add item:", error);
-      // Parent component will show the error notification
     }
-    // Don't set isAdding(false) here, the parent notification
-    // timeout will handle the visual state.
-    // Let's reset it after a short delay to allow notification to show
     setTimeout(() => setIsAdding(false), 3000);
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="group relative rounded-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200 dark:border-gray-800/50 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
     >
-      <div 
+      <div
         className="absolute -inset-1.5 bg-gradient-to-r from-orange-400 to-amber-400 rounded-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-300 blur-lg"
         aria-hidden="true"
       />
-      
+
       <div className="relative z-10 flex flex-col flex-grow">
         <div className="relative w-full h-32 sm:h-40">
           <Image
@@ -128,18 +121,6 @@ export default function SearchAllPage() {
         }
         const data = await res.json();
         setItems(data.items || []);
-        
-        /* REMOVED MOCK DATA
-        // Mock data since /api/items doesn't exist in this context
-        const mockData = [
-            { _id: '1', itemName: 'Masala Dosa', category: 'South Indian', sellerName: 'Anna\'s Cafe', price: 80, rating: 4.5, numReviews: 120, image: 'https://placehold.co/400x300/f4a261/ffffff?text=Masala+Dosa' },
-            { _id: '2', itemName: 'Chole Bhature', category: 'North Indian', sellerName: 'Punjabi Tadka', price: 120, rating: 4.7, numReviews: 200, image: 'https://placehold.co/400x300/e76f51/ffffff?text=Chole+Bhature' },
-            { _id: '3', itemName: 'Veg Biryani', category: 'Main Course', sellerName: 'Anna\'s Cafe', price: 150, rating: 4.2, numReviews: 80, image: 'https://placehold.co/400x300/2a9d8f/ffffff?text=Veg+Biryani' },
-            { _id: '4', itemName: 'Paneer Tikka', category: 'Starters', sellerName: 'Punjabi Tadka', price: 180, rating: 4.6, numReviews: 150, image: 'https://placehold.co/400x300/264653/ffffff?text=Paneer+Tikka' },
-        ];
-        await new Promise(res => setTimeout(res, 1000)); // Simulate network delay
-        setItems(mockData);
-        */
 
       } catch (err) {
         setError(err.message);
@@ -147,7 +128,6 @@ export default function SearchAllPage() {
         setIsLoading(false);
       }
     };
-// ... (fetchAllItems function is unchanged) ...  <-- THIS COMMENT WAS REMOVED
 
     fetchAllItems();
 
@@ -160,17 +140,25 @@ export default function SearchAllPage() {
     }
   }, []);
 
-  const filteredItems = useMemo(() => 
-    items.filter(item =>
-      item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.sellerName.toLowerCase().includes(searchQuery.toLowerCase()) // <-- It's right here!
-    ).sort((a, b) => a.price - b.price),
-    [items, searchQuery]
-  );
+  const filteredItems = useMemo(() => {
+    if (!searchQuery) return items;
+
+    const queryWords = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
+
+    return items.filter(item => {
+      const nameWords = item.itemName.toLowerCase().split(/[\s-]+/);
+      const categoryWords = item.category.toLowerCase().split(/[\s-]+/);
+      const sellerWords = item.sellerName.toLowerCase().split(/[\s-]+/);
+
+      return queryWords.every(qWord =>
+        nameWords.some(n => n.includes(qWord)) ||
+        categoryWords.some(c => c.includes(qWord)) ||
+        sellerWords.some(s => s.includes(qWord))
+      );
+    }).sort((a, b) => a.price - b.price);
+  }, [items, searchQuery]);
 
   const handleAddToCart = async (item) => {
-    // Clear previous notification
     setNotification({ message: '', type: 'success' });
 
     try {
@@ -189,7 +177,7 @@ export default function SearchAllPage() {
           // I am DEFAULTING to 'dine-in'. You will need to add UI
           // (like two buttons, or a select) to let the user choose.
           // ---
-          service: 'dine-in', 
+          service: 'dine-in',
           sellerName: item.sellerName,
           // userId is assumed to be handled by your backend API route (from a session/cookie)
         }),
@@ -249,22 +237,21 @@ export default function SearchAllPage() {
             exit={{ opacity: 0, y: -100 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             // Updated to be dynamic based on notification type
-            className={`fixed top-0 left-1/2 -translate-x-1/2 z-50 text-white px-6 py-3 rounded-full shadow-lg ${
-              notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-            }`}
+            className={`fixed top-0 left-1/2 -translate-x-1/2 z-50 text-white px-6 py-3 rounded-full shadow-lg ${notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+              }`}
           >
             {notification.message}
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div 
+      <div
         className="absolute inset-0 bg-[radial-gradient(theme(colors.gray.100)_1px,transparent_1px)] dark:bg-[radial-gradient(theme(colors.gray.800)_1px,transparent_1px)] [background-size:32px_32px] opacity-40"
         aria-hidden="true"
       />
-      
+
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
