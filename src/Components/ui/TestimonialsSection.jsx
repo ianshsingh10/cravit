@@ -9,25 +9,21 @@ const testimonials = [
   {
     quote: "craVIT is a lifesaver! I can check menus and decide what to eat before even leaving my room. The reviews are super helpful.",
     author: "Priya S.",
-    title: "Student",
     avatar: "PS"
   },
   {
     quote: "The pre-order feature saves me so much time between classes. I just grab my food and go. 10/10.",
     author: "Rohan M.",
-    title: "Student",
     avatar: "RM"
   },
   {
     quote: "As a faculty member, finding a quick and good meal is crucial. craVIT makes it incredibly easy. Highly recommended.",
     author: "Dr. Anjali V.",
-    title: "Faculty",
     avatar: "AV"
   },
   {
     quote: "The live order tracking is surprisingly accurate. I just walk in, grab my order, and go. Fantastic app.",
     author: "Karan P.",
-    title: "Student",
     avatar: "KP"
   }
 ];
@@ -113,7 +109,6 @@ export default function TestimonialsSection() {
                     <p className="font-bold text-gray-900 dark:text-white">
                       {testimonial.author}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{testimonial.title}</p>
                   </div>
                 </div>
               </div>

@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Phone, Mail, Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
+import { User, Phone, Mail, Loader2, AlertTriangle, CheckCircle, Camera } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 export default function EditProfilePage() {
     const [form, setForm] = useState({ name: '', phoneNo: '' });
@@ -57,6 +59,8 @@ export default function EditProfilePage() {
             const result = await res.json();
             if (res.ok) {
                 setSuccess(result.message || 'Profile updated successfully!');
+                // Optional: Refresh router to update header avatar
+                router.refresh();
             } else {
                 setError(result.error || 'Failed to update profile.');
             }
@@ -69,41 +73,117 @@ export default function EditProfilePage() {
 
     if (isAuthLoading) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex justify-center items-center">
-                <Loader2 className="w-12 h-12 text-orange-500 animate-spin" />
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex justify-center items-center">
+                <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
+                    <p className="text-sm text-gray-500 font-medium">Loading profile...</p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center p-4 pt-30">
-            <div className="max-w-lg w-full mx-auto bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center p-4 pt-20 sm:pt-28">
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="max-w-lg w-full mx-auto bg-white dark:bg-gray-900 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800"
+            >
                 <div className="text-center mb-8">
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Edit Your Profile</h2>
-                    <p className="text-gray-500 dark:text-gray-400">Keep your information up to date.</p>
+                    <div className="relative w-24 h-24 mx-auto mb-4 group">
+                        <div className="w-full h-full rounded-full overflow-hidden ring-4 ring-gray-100 dark:ring-gray-800 bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-3xl font-bold text-orange-600 dark:text-orange-400">
+                            {user?.image ? (
+                                <Image src={user.image} alt="Profile" width={96} height={96} className="object-cover w-full h-full" />
+                            ) : (
+                                user?.name?.charAt(0).toUpperCase() || 'U'
+                            )}
+                        </div>
+                        {/* Optional: Camera Icon for future image upload feature */}
+                        <div className="absolute bottom-0 right-0 bg-white dark:bg-gray-800 p-1.5 rounded-full shadow-md border border-gray-200 dark:border-gray-700 text-gray-500 cursor-not-allowed" title="Change photo coming soon">
+                             <Camera size={16} />
+                        </div>
+                    </div>
+                    <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white">Edit Profile</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Update your personal details below.</p>
                 </div>
 
-                {error && <p className="bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-3 rounded-lg mb-4 text-sm flex items-center gap-2"><AlertTriangle size={18}/> {error}</p>}
-                {success && <p className="bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 p-3 rounded-lg mb-4 text-sm flex items-center gap-2"><CheckCircle size={18}/> {success}</p>}
+                <AnimatePresence>
+                    {error && (
+                        <motion.div 
+                            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                            className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-xl mb-6 text-sm flex items-start gap-3"
+                        >
+                            <AlertTriangle size={18} className="mt-0.5 flex-shrink-0"/> 
+                            <span>{error}</span>
+                        </motion.div>
+                    )}
+                    {success && (
+                        <motion.div 
+                            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                            className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 p-4 rounded-xl mb-6 text-sm flex items-start gap-3"
+                        >
+                            <CheckCircle size={18} className="mt-0.5 flex-shrink-0"/> 
+                            <span>{success}</span>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        <input type="email" value={user?.email || ''} className="pl-10 text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full" disabled />
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Email Address</label>
+                        <div className="relative group">
+                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-gray-500 transition-colors" size={18} />
+                            <input 
+                                type="email" 
+                                value={user?.email || ''} 
+                                className="pl-11 pr-4 py-3 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl w-full cursor-not-allowed font-medium" 
+                                disabled 
+                            />
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1 ml-1">Email cannot be changed.</p>
                     </div>
-                    <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        <input name="name" value={form.name} placeholder="Your Full Name" className="pl-10 text-black dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-orange-500" onChange={handleChange} required />
+
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Full Name</label>
+                        <div className="relative">
+                            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                            <input 
+                                name="name" 
+                                value={form.name} 
+                                placeholder="Your Full Name" 
+                                className="pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl w-full text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all" 
+                                onChange={handleChange} 
+                                required 
+                            />
+                        </div>
                     </div>
-                    <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        <input name="phoneNo" type="tel" value={form.phoneNo} placeholder="Your Phone Number" className="pl-10 text-black dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-orange-500" onChange={handleChange} required />
+
+                    <div>
+                         <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Phone Number</label>
+                        <div className="relative">
+                            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                            <input 
+                                name="phoneNo" 
+                                type="tel" 
+                                value={form.phoneNo} 
+                                placeholder="Your Phone Number" 
+                                className="pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl w-full text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all" 
+                                onChange={handleChange} 
+                                required 
+                            />
+                        </div>
                     </div>
-                    <button type="submit" disabled={isLoading} className="w-full flex justify-center items-center gap-2 bg-orange-500 text-white font-bold px-4 py-3 rounded-lg hover:bg-orange-600 transition-colors disabled:bg-orange-400">
-                        {isLoading ? <><Loader2 className="animate-spin" size={20}/> Saving...</> : "Save Changes"}
+
+                    <button 
+                        type="submit" 
+                        disabled={isLoading} 
+                        className="w-full mt-6 flex justify-center items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-lg shadow-orange-500/30 hover:shadow-orange-500/40 disabled:opacity-70 disabled:shadow-none disabled:cursor-not-allowed transition-all active:scale-[0.98]"
+                    >
+                        {isLoading ? <Loader2 className="animate-spin" size={20}/> : "Save Changes"}
                     </button>
                 </form>
-            </div>
+            </motion.div>
         </div>
     );
 }

@@ -15,7 +15,7 @@ export const StatusIndicator = ({ status }) => {
     };
     const { icon, color } = statusConfig[status] || statusConfig.Default;
     return (
-        <div className={`flex items-center gap-2 text-sm font-semibold ${color}`}>
+        <div className={`flex items-center gap-2 text-sm font-semibold mt-4 ${color}`}>
             {icon}
             <span>{status}</span>
         </div>

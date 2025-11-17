@@ -1,38 +1,42 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Plus, Minus, X, Loader2, Star, CheckCircle, AlertTriangle } from "lucide-react";
+import { 
+  Plus, Minus, X, Loader2, Star, 
+  ShoppingBag, Utensils, Check, AlertCircle 
+} from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import useCartStore from '@/Components/stores/cartStore'; // Import the cart store
+import useCartStore from '@/Components/stores/cartStore';
 
 export const MenuItemCard = ({ item }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [orderType, setOrderType] = useState("Dine-in");
-  
-  // [IMPROVED] Replaced isAdding state with a more robust status object
-  const [status, setStatus] = useState({
-    loading: false,
-    error: null,
-    success: null,
-  });
+  const { fetchCount } = useCartStore();
+
+  // Prevent body scroll when modal is open (Critical for mobile)
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isModalOpen]);
+
+  const handleOpenModal = () => {
+    setQuantity(1);
+    setOrderType("Dine-in");
+    setStatus({ loading: false, error: null, success: null });
+    setIsModalOpen(true);
+  };
+
+  const [status, setStatus] = useState({ loading: false, error: null, success: null });
 
   const basePrice = item.price * quantity;
   const parcelCharge = orderType === "Parcel" ? 10 * quantity : 0;
   const totalPrice = basePrice + parcelCharge;
-
-  const handleOpenModal = () => setIsModalOpen(true);
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    // Reset state after modal is fully closed
-    setTimeout(() => {
-      setQuantity(1);
-      setOrderType("Dine-in");
-      setStatus({ loading: false, error: null, success: null });
-    }, 300); // 300ms matches exit animation
-  };
 
   const handleConfirmAddToCart = async () => {
     setStatus({ loading: true, error: null, success: null });
@@ -48,249 +52,241 @@ export const MenuItemCard = ({ item }) => {
       });
 
       const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Failed to add.");
+      
+      setStatus({ loading: false, error: null, success: true });
+      fetchCount(); 
+      
+      setTimeout(() => {
+        setIsModalOpen(false);
+        setStatus(prev => ({ ...prev, success: null }));
+      }, 1200);
 
-      if (!res.ok) {
-        throw new Error(result.error || "Could not add item to cart.");
-      } else {
-        // [IMPROVED] On success: show message, update global cart count, and auto-close
-        setStatus({ loading: false, error: null, success: `${quantity} x ${item.itemName} added!` });
-        
-        // Update global cart store (this function exists in your DynamicHeader)
-        useCartStore.getState().fetchCount(); 
-        
-        setTimeout(() => {
-          handleCloseModal();
-        }, 1500); // Auto-close modal after 1.5s
-      }
     } catch (error) {
-      console.error("Failed to add item to cart:", error);
-      // [IMPROVED] Show error message in modal
       setStatus({ loading: false, error: error.message, success: null });
     }
   };
 
   return (
     <>
-      {/* [IMPROVED] Card Styling: Frosted glass and glow hover */}
-      <div className="group relative rounded-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200 dark:border-gray-800/50 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-        {/* Glowing border effect */}
-        <div 
-          className="absolute -inset-1.5 bg-gradient-to-r from-orange-400 to-amber-400 rounded-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-300 blur-lg"
-          aria-hidden="true"
-        />
-        
-        {/* Card Content (relative to stay on top) */}
-        <div className="relative z-10 flex flex-col flex-grow">
-          <div className="relative w-full h-32 sm:h-40">
-            <Image
-              src={
-                item.image ||
-                "https://placehold.co/400x300/F0F0F0/333333?text=Item"
-              }
-              alt={item.itemName}
-              fill
-              className="object-cover"
-              // [REMOVED] unoptimized={true} - We will add placehold.co to next.config.js
-            />
+      {/* --- CARD COMPONENT --- */}
+      <motion.div 
+        layoutId={`card-${item._id}`}
+        className="group relative bg-white dark:bg-gray-900 rounded-2xl shadow-sm hover:shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col h-full transition-all active:scale-[0.98] duration-200"
+      >
+        {/* Image Section */}
+        <div className="relative w-full h-36 sm:h-44 overflow-hidden bg-gray-100 dark:bg-gray-800">
+          <Image
+            src={item.image || "https://placehold.co/600x400"}
+            alt={item.itemName}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+          
+          {/* Category Badge */}
+          <div className="absolute top-2 left-2">
+             <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-white/95 dark:bg-black/80 backdrop-blur-md text-gray-800 dark:text-gray-200 rounded-md shadow-sm">
+               {item.category}
+             </span>
           </div>
-          <div className="p-4 flex flex-col flex-grow">
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <h3 className="text-md sm:text-lg font-bold text-gray-800 dark:text-gray-100 break-words">
-                  {item.itemName}
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {item.category}
-                </p>
-              </div>
-              {item.numReviews > 0 && (
-                <div className="flex-shrink-0 flex items-center gap-1.5 mt-1 ml-2">
-                  <Star className="w-4 h-4 text-yellow-400" fill="currentColor" />
-                  <span className="font-bold text-gray-800 dark:text-gray-200 text-sm">
-                    {item.rating.toFixed(1)}
-                  </span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    ({item.numReviews})
-                  </span>
-                </div>
-              )}
+          
+          {/* Rating */}
+          {item.rating > 0 && (
+            <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/10">
+               <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+               <span className="text-[10px] font-bold text-white">{item.rating.toFixed(1)}</span>
             </div>
-            <div className="flex flex-row justify-between items-center mt-4 pt-2 flex-grow">
-              <p className="text-lg sm:text-xl font-black text-orange-600 dark:text-orange-400">
-                ₹{item.price}
-              </p>
-              <button
-                onClick={handleOpenModal}
-                className="bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-300 p-2 rounded-full transition-all duration-300
-                           group-hover:bg-orange-500 group-hover:text-white group-hover:scale-110
-                           dark:group-hover:bg-orange-500 dark:group-hover:text-white"
-                aria-label={`Add ${item.itemName} to cart`}
-              >
-                <Plus size={20} />
-              </button>
-            </div>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="p-4 flex flex-col flex-grow">
+          <div className="flex-1 mb-2">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white leading-snug line-clamp-2">
+              {item.itemName}
+            </h3>
+          </div>
+
+          <div className="flex items-center justify-between pt-2 border-t border-dashed border-gray-200 dark:border-gray-800">
+            <span className="text-lg font-black text-gray-900 dark:text-white">₹{item.price}</span>
+            
+            <button
+              onClick={handleOpenModal}
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 active:bg-orange-500 active:text-white transition-colors"
+            >
+              <Plus size={20} strokeWidth={3} />
+            </button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* --- [IMPROVED] Add to Cart Modal --- */}
+      {/* --- MOBILE-FIRST MODAL (BOTTOM SHEET) --- */}
       <AnimatePresence>
         {isModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={handleCloseModal}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 flex justify-center items-center p-4"
-          >
+          <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center sm:p-4">
+            
+            {/* Backdrop */}
             <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsModalOpen(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+
+            {/* Drawer / Modal */}
+            <motion.div
+              initial={{ y: "100%", opacity: 0 }} // Start from bottom
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "100%", opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-sm"
+              className="relative w-full max-w-sm bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
             >
+              {/* Mobile Drag Handle */}
+              <div className="w-full flex justify-center pt-3 pb-1 sm:hidden">
+                <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full" />
+              </div>
+
+              {/* Close Button (Desktop mostly, but good fallback) */}
               <button
-                onClick={handleCloseModal}
-                className="absolute top-3 right-3 p-2 rounded-full text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-                aria-label="Close"
+                onClick={() => setIsModalOpen(false)}
+                className="absolute top-4 right-4 z-10 p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
               >
                 <X size={20} />
               </button>
-              
-              <div className="p-6 pt-12 flex flex-col gap-5">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+
+              {/* Header Image */}
+              <div className="relative h-32 sm:h-40 bg-gray-100 dark:bg-gray-800">
+                <Image
+                  src={item.image || "https://placehold.co/600x400"}
+                  alt={item.itemName}
+                  fill
+                  className="object-cover opacity-95"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-gray-900 via-transparent to-transparent" />
+              </div>
+
+              <div className="px-5 pb-6 -mt-6 relative">
+                {/* Item Info */}
+                <div className="mb-6">
+                  <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white leading-tight mb-1">
                     {item.itemName}
                   </h2>
-                  <p className="text-lg font-semibold text-orange-600 dark:text-orange-400">
-                    ₹{item.price}
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">
+                    Base price: ₹{item.price}
                   </p>
                 </div>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                    Quantity
-                  </h3>
-                  <div className="flex items-center gap-4 bg-gray-100 dark:bg-gray-800 rounded-full p-1">
+
+                {/* BIG Quantity Controls */}
+                <div className="flex items-center justify-between mb-6 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800">
+                  <span className="font-bold text-gray-700 dark:text-gray-300 pl-2">Quantity</span>
+                  <div className="flex items-center gap-4">
                     <button
-                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="p-2 rounded-full disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                      onClick={() => setQuantity(q => Math.max(1, q - 1))}
                       disabled={quantity === 1}
+                      className="w-12 h-12 flex items-center justify-center rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 disabled:opacity-30 shadow-sm active:scale-90 transition-transform"
                     >
-                      <Minus size={16} />
+                      <Minus size={20} />
                     </button>
-                    <span className="w-8 text-center text-lg font-bold text-gray-900 dark:text-white">
-                      {quantity}
-                    </span>
+                    <span className="w-8 text-center font-bold text-xl text-gray-900 dark:text-white">{quantity}</span>
                     <button
-                      onClick={() => setQuantity((q) => q + 1)}
-                      className="p-2 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                      onClick={() => setQuantity(q => q + 1)}
+                      className="w-12 h-12 flex items-center justify-center rounded-xl bg-orange-500 text-white shadow-orange-500/30 shadow-sm active:scale-90 transition-transform"
                     >
-                      <Plus size={16} />
+                      <Plus size={20} />
                     </button>
                   </div>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                    Service Option
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={() => setOrderType("Dine-in")}
-                      className={`py-3 px-4 rounded-lg font-bold text-center transition ${
-                        orderType === "Dine-in"
-                          ? "bg-orange-500 text-white ring-2 ring-orange-600"
-                          : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
-                      }`}
-                    >
-                      Dine-in
-                    </button>
-                    <button
-                      onClick={() => setOrderType("Parcel")}
-                      className={`py-3 px-4 rounded-lg font-bold text-center transition ${
-                        orderType === "Parcel"
-                          ? "bg-orange-500 text-white ring-2 ring-orange-600"
-                          : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
-                      }`}
-                    >
-                      Parcel
-                    </button>
-                  </div>
-                  <AnimatePresence>
-                    {orderType === "Parcel" && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                        animate={{
-                          opacity: 1,
-                          height: "auto",
-                          marginTop: "12px",
-                        }}
-                        exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                        className="text-sm text-center text-green-600 dark:text-green-400 font-semibold overflow-hidden"
-                      >
-                        + ₹{parcelCharge} parcel charges applied
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 </div>
 
-                {/* [IMPROVED] Dynamic Add to Cart Button */}
-                <div className="h-16">
-                  <AnimatePresence mode="wait">
-                    {status.loading ? (
-                      <motion.div
-                        key="loading"
-                        className="w-full h-full flex justify-center items-center"
-                      >
-                        <Loader2 className="animate-spin text-orange-500" size={32} />
-                      </motion.div>
-                    ) : status.error ? (
-                      <motion.div
-                        key="error"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="w-full h-full flex flex-col justify-center items-center text-center"
-                      >
-                        <div className="flex items-center gap-2 text-red-500 dark:text-red-400">
-                          <AlertTriangle size={18} />
-                          <p className="font-semibold">{status.error}</p>
-                        </div>
-                        <button 
-                          onClick={handleConfirmAddToCart} 
-                          className="text-sm font-semibold text-orange-500 hover:underline mt-1"
+                {/* Service Selection */}
+                <div className="mb-8">
+                  <span className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 ml-1">Service Option</span>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ServiceOption 
+                      active={orderType === "Dine-in"} 
+                      onClick={() => setOrderType("Dine-in")}
+                      icon={<Utensils size={20} />}
+                      label="Dine-in"
+                    />
+                    <ServiceOption 
+                      active={orderType === "Parcel"} 
+                      onClick={() => setOrderType("Parcel")}
+                      icon={<ShoppingBag size={20} />}
+                      label="Parcel"
+                      subLabel="+ ₹10/item"
+                    />
+                  </div>
+                </div>
+
+                {/* Sticky-ish Action Button */}
+                <div className="pt-2 pb-4 sm:pb-0">
+                   <AnimatePresence mode="wait">
+                      {status.loading ? (
+                        <LoadingBtn />
+                      ) : status.success ? (
+                        <SuccessBtn />
+                      ) : (
+                        <button
+                          onClick={handleConfirmAddToCart}
+                          className="w-full bg-gray-900 dark:bg-white text-white dark:text-black py-4 rounded-2xl font-bold text-lg shadow-xl active:scale-[0.98] transition-all flex items-center justify-between px-6"
                         >
-                          Try Again
+                          <span>Add to Order</span>
+                          <span className="bg-white/20 dark:bg-black/10 px-3 py-1 rounded-lg text-base">₹{totalPrice}</span>
                         </button>
-                      </motion.div>
-                    ) : status.success ? (
-                      <motion.div
-                        key="success"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="w-full h-full flex justify-center items-center gap-2 text-lg font-bold text-green-600"
-                      >
-                        <CheckCircle />
-                        <span>Added!</span>
-                      </motion.div>
-                    ) : (
-                      <motion.button
-                        key="add"
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        onClick={handleConfirmAddToCart}
-                        className="w-full bg-orange-500 text-white font-bold py-4 rounded-xl text-lg hover:bg-orange-600 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:bg-orange-400 disabled:cursor-not-allowed flex justify-center items-center"
-                      >
-                        {`Add ${quantity} to Cart (₹${totalPrice})`}
-                      </motion.button>
-                    )}
-                  </AnimatePresence>
+                      )}
+                   </AnimatePresence>
+                   
+                   {status.error && (
+                     <motion.p 
+                       initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                       className="text-red-500 text-center text-sm mt-3 font-medium flex items-center justify-center gap-1"
+                     >
+                       <AlertCircle size={16} /> {status.error}
+                     </motion.p>
+                   )}
                 </div>
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </>
   );
 };
+
+// --- Sub Components ---
+
+const ServiceOption = ({ active, onClick, icon, label, subLabel }) => (
+  <button
+    onClick={onClick}
+    className={`
+      flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all duration-200 h-24
+      ${active 
+        ? "border-orange-500 bg-orange-50 dark:bg-orange-500/20 text-orange-700 dark:text-orange-300" 
+        : "border-transparent bg-gray-50 dark:bg-gray-800 text-gray-500"}
+    `}
+  >
+    <div className={`mb-1 ${active ? "scale-110 transition-transform" : ""}`}>
+      {icon}
+    </div>
+    <span className="text-sm font-bold">
+      {label}
+    </span>
+    {subLabel && <span className="text-[10px] opacity-80">{subLabel}</span>}
+  </button>
+);
+
+const LoadingBtn = () => (
+  <div className="w-full bg-gray-100 dark:bg-gray-800 h-14 rounded-2xl flex items-center justify-center text-gray-400 font-medium">
+    <Loader2 className="animate-spin mr-2" /> Adding to cart...
+  </div>
+);
+
+const SuccessBtn = () => (
+  <div className="w-full bg-green-500 text-white h-14 rounded-2xl flex items-center justify-center font-bold gap-2 shadow-lg shadow-green-500/30">
+    <Check size={24} strokeWidth={3} /> Added Successfully
+  </div>
+);

@@ -12,6 +12,8 @@ const orderItemSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     quantity: { type: Number, required: true },
     service: { type: String, required: true },
+    foodRating: { type: Number, default: 0 },
+    review: { type: String, default: "" }
 }, { _id: false });
 
 const orderSchema = new mongoose.Schema({

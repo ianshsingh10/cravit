@@ -4,9 +4,8 @@ dotenv.config();
 import mongoose from "mongoose";
 import fs from "fs";
 import path from "path";
-import Item from "./models/items.js"; // adjust the path if needed
+import Item from "../models/items.js";
 
-// Recursively convert all {$oid: "..."} structures to plain strings
 function convertOids(input) {
   if (Array.isArray(input)) {
     return input.map(convertOids);

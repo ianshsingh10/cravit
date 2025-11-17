@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken";
 export async function POST(req) {
     await dbConnect();
     try {
-        const cookie = cookies();
+        const cookie = await cookies();
         const token = cookie.get("token")?.value;
         if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -41,15 +41,14 @@ export async function POST(req) {
         }
         
         const operations = itemsToAdd.map(item => {
-            // ✅ FIX: Separate the quantity from the rest of the item data
             const { quantity, ...itemDataToSet } = item;
             
             return {
                 updateOne: {
                     filter: { userId: item.userId, itemId: item.itemId, service: item.service },
                     update: { 
-                        $inc: { quantity: quantity }, // Handle quantity separately
-                        $set: itemDataToSet          // Set all other fields
+                        $inc: { quantity: quantity }, 
+                        $set: itemDataToSet          
                     },
                     upsert: true,
                 },
