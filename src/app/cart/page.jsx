@@ -11,17 +11,42 @@ import {
   Minus,
   ShoppingCart,
   ArrowRight,
-  Utensils,
-  Package,
   Receipt,
-  ChevronRight
+  CheckCircle,
+  X,
+  Package
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import useCartStore from "@/Components/stores/cartStore";
 import { motion, AnimatePresence } from "framer-motion";
 
-// --- 1. Mobile-Optimized Item Row ---
-const CartItemRow = ({ item, onUpdate, onRemove, onServiceChange, isUpdating }) => {
+// --- Custom Toast Component ---
+const Toast = ({ message, type, onClose }) => {
+    useEffect(() => {
+        const timer = setTimeout(onClose, 3000);
+        return () => clearTimeout(timer);
+    }, [onClose]);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className={`fixed bottom-24 left-4 right-4 md:bottom-6 md:left-1/2 md:-translate-x-1/2 md:w-auto md:min-w-[300px] z-[100] p-4 rounded-xl shadow-2xl flex items-center gap-3 border backdrop-blur-md ${
+                type === 'error' 
+                ? 'bg-red-50/90 border-red-100 text-red-700 dark:bg-red-900/90 dark:border-red-800 dark:text-red-100' 
+                : 'bg-gray-900/90 border-gray-800 text-white dark:bg-white/90 dark:text-gray-900'
+            }`}
+        >
+            {type === 'error' ? <AlertTriangle size={20} /> : <CheckCircle size={20} className="text-green-500" />}
+            <span className="font-semibold text-sm flex-1">{message}</span>
+            <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full"><X size={16}/></button>
+        </motion.div>
+    );
+};
+
+// --- Cart Item Component ---
+const CartItemRow = ({ item, onUpdate, onRequestRemove, onServiceChange, isUpdating }) => {
   return (
     <motion.div 
       layout
@@ -31,7 +56,6 @@ const CartItemRow = ({ item, onUpdate, onRemove, onServiceChange, isUpdating }) 
       className="group relative bg-white dark:bg-gray-800 rounded-2xl p-3 sm:p-4 mb-3 sm:mb-4 border border-gray-100 dark:border-gray-700 shadow-sm"
     >
       <div className="flex gap-3 sm:gap-4">
-        {/* Image - Slightly smaller on mobile */}
         <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden">
           <Image
             src={item.itemId?.image || "https://placehold.co/200x200/F0F0F0/333333?text=Food"}
@@ -42,7 +66,6 @@ const CartItemRow = ({ item, onUpdate, onRemove, onServiceChange, isUpdating }) 
           />
         </div>
 
-        {/* Content */}
         <div className="flex-grow flex flex-col justify-between min-w-0">
           <div className="flex justify-between items-start gap-1">
             <div>
@@ -58,10 +81,7 @@ const CartItemRow = ({ item, onUpdate, onRemove, onServiceChange, isUpdating }) 
             </p>
           </div>
 
-          {/* Controls Row */}
           <div className="flex items-end justify-between gap-2 mt-2">
-            
-            {/* Service Toggle (Segmented Control) */}
             <div className="flex bg-gray-100 dark:bg-gray-900/50 rounded-lg p-0.5">
                <button
                   onClick={() => onServiceChange(item._id, "dine-in")}
@@ -69,7 +89,7 @@ const CartItemRow = ({ item, onUpdate, onRemove, onServiceChange, isUpdating }) 
                   className={`flex items-center justify-center px-2 py-1 rounded-md text-[10px] font-bold transition-all ${
                     item.service === "dine-in"
                       ? "bg-white dark:bg-gray-700 text-orange-600 dark:text-orange-400 shadow-sm"
-                      : "text-gray-500"
+                      : "text-gray-500 hover:text-gray-900"
                   }`}
                 >
                   Dine-in
@@ -80,20 +100,19 @@ const CartItemRow = ({ item, onUpdate, onRemove, onServiceChange, isUpdating }) 
                   className={`flex items-center justify-center px-2 py-1 rounded-md text-[10px] font-bold transition-all ${
                     item.service === "parcel"
                       ? "bg-white dark:bg-gray-700 text-orange-600 dark:text-orange-400 shadow-sm"
-                      : "text-gray-500"
+                      : "text-gray-500 hover:text-gray-900"
                   }`}
                 >
                   Parcel
                 </button>
             </div>
 
-            {/* Quantity Controls */}
             <div className="flex items-center gap-2">
                <div className="flex items-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg h-8 sm:h-9">
                   <button
                     onClick={() => onUpdate(item._id, item.quantity - 1)}
                     disabled={item.quantity <= 1 || isUpdating}
-                    className="w-8 h-full flex items-center justify-center text-gray-500 active:text-orange-600 disabled:opacity-30"
+                    className="w-8 h-full flex items-center justify-center text-gray-500 active:text-orange-600 disabled:opacity-30 active:bg-gray-50 dark:active:bg-gray-800 rounded-l-lg transition-colors"
                   >
                     <Minus size={14} />
                   </button>
@@ -101,15 +120,14 @@ const CartItemRow = ({ item, onUpdate, onRemove, onServiceChange, isUpdating }) 
                   <button
                     onClick={() => onUpdate(item._id, item.quantity + 1)}
                     disabled={isUpdating}
-                    className="w-8 h-full flex items-center justify-center text-gray-500 active:text-orange-600 disabled:opacity-30"
+                    className="w-8 h-full flex items-center justify-center text-gray-500 active:text-orange-600 disabled:opacity-30 active:bg-gray-50 dark:active:bg-gray-800 rounded-r-lg transition-colors"
                   >
                     <Plus size={14} />
                   </button>
                </div>
                
-               {/* Remove Button (Icon only) */}
                <button
-                  onClick={() => onRemove(item._id)}
+                  onClick={() => onRequestRemove(item._id)}
                   disabled={isUpdating}
                   className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 text-red-500 active:bg-red-100 dark:bg-red-900/10 dark:text-red-400 transition-colors"
                >
@@ -120,11 +138,10 @@ const CartItemRow = ({ item, onUpdate, onRemove, onServiceChange, isUpdating }) 
         </div>
       </div>
       
-      {/* Parcel Warning */}
       {item.service === "parcel" && (
          <div className="mt-2 pt-1.5 border-t border-dashed border-gray-200 dark:border-gray-700 flex justify-between items-center text-[10px] sm:text-xs">
             <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1">
-               <Package size={10}/> Parcel charges
+               <Package size={10}/> Parcel charges applied
             </span>
             <span className="font-medium text-gray-900 dark:text-white">+ ₹{10 * item.quantity}</span>
          </div>
@@ -144,18 +161,25 @@ const SummaryRow = ({ label, value, isTotal = false }) => (
   </div>
 );
 
-// --- 2. Main Page ---
+// --- Main Page ---
 export default function CartPage() {
   const [cartItems, setCartItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState("");
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [toast, setToast] = useState(null);
+  
+  // Delete Modal State
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   const router = useRouter();
   const { fetchCount } = useCartStore();
 
-  // Fetch Logic (Same as before)
+  const showToast = (message, type = 'success') => {
+      setToast({ message, type });
+  };
+
   useEffect(() => {
     const fetchCartItems = async () => {
       setIsLoading(true);
@@ -176,33 +200,68 @@ export default function CartPage() {
     fetchCartItems();
   }, []);
 
-  // Update Handlers (Condensed for brevity, logic identical to previous)
-  const handleUpdateQuantity = async (id, qty) => {
-    if(qty<1) return; setIsUpdating(true);
-    try {
-        const res = await fetch("/api/cart/update", { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ cartItemId: id, quantity: qty }) });
-        if(!res.ok) throw new Error(); const updated = await res.json();
-        setCartItems(p => p.map(i => i._id === id ? updated : i));
-    } catch { /* error handling */ } finally { setIsUpdating(false); }
-  };
-  const handleServiceChange = async (id, srv) => {
+  const handleUpdateQuantity = async (cartItemId, quantity) => {
+    if (quantity < 1) return;
     setIsUpdating(true);
     try {
-        const res = await fetch("/api/cart/update", { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ cartItemId: id, service: srv }) });
-        if(!res.ok) throw new Error(); const updated = await res.json();
-        setCartItems(p => p.map(i => i._id === id ? updated : i));
-    } catch { /* error handling */ } finally { setIsUpdating(false); }
-  };
-  const handleRemoveItem = async (id) => {
-    if(!confirm("Remove item?")) return; setIsUpdating(true);
-    try {
-        const res = await fetch("/api/cart/remove", { method: "DELETE", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ cartItemId: id }) });
-        if(!res.ok) throw new Error(); 
-        setCartItems(p => p.filter(i => i._id !== id)); fetchCount();
-    } catch { /* error handling */ } finally { setIsUpdating(false); }
+      const res = await fetch("/api/cart/update", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cartItemId, quantity }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const updatedItem = await res.json();
+      setCartItems((prev) => prev.map((item) => item._id === cartItemId ? updatedItem : item));
+    } catch (err) { 
+        showToast("Failed to update quantity", "error"); 
+    } finally { setIsUpdating(false); }
   };
 
-  // Calculations
+  const handleServiceChange = async (cartItemId, service) => {
+    setIsUpdating(true);
+    try {
+      const res = await fetch("/api/cart/update", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cartItemId, service }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const updatedItem = await res.json();
+      setCartItems((prev) => prev.map((item) => item._id === cartItemId ? updatedItem : item));
+    } catch (err) { 
+        showToast("Failed to update service", "error"); 
+    } finally { setIsUpdating(false); }
+  };
+
+  // 1. Trigger Confirmation
+  const requestRemoveItem = (cartItemId) => {
+    setItemToDelete(cartItemId);
+  };
+
+  // 2. Actual Delete Logic
+  const confirmRemoveItem = async () => {
+    if (!itemToDelete) return;
+    
+    setIsUpdating(true);
+    setItemToDelete(null);
+
+    try {
+      const res = await fetch("/api/cart/remove", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cartItemId: itemToDelete }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      setCartItems((prev) => prev.filter((item) => item._id !== itemToDelete));
+      fetchCount();
+      showToast("Item removed from cart", "success");
+    } catch (err) { 
+        showToast("Failed to remove item", "error"); 
+    } finally { 
+      setIsUpdating(false); 
+    }
+  };
+
   const { subtotal, parcelCharges, upiCharges, grandTotal, totalItems } = useMemo(() => {
     let sub = 0; let parcel = 0; let count = 0;
     cartItems.forEach((item) => {
@@ -216,7 +275,6 @@ export default function CartPage() {
     return { subtotal: sub, parcelCharges: parcel, upiCharges: fees, grandTotal: grand, totalItems: count };
   }, [cartItems]);
 
-  // Checkout (Using Razorpay logic from previous)
   const handleCheckout = async () => {
     setIsCheckingOut(true);
     try {
@@ -224,23 +282,36 @@ export default function CartPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to create order.");
       
-      fetchCount(); setCartItems([]); // Optimistic UI
-
+      fetchCount(); 
+      setCartItems([]); 
+      
       const options = {
-        key: data.key_id, amount: data.order.amount, currency: "INR", name: "Cravit", 
-        description: "Food Order", image: "/cravit-logo.jpg", order_id: data.order.id,
-        handler: async function (response) { router.push("/user/dashboard"); },
+        key: data.key_id, 
+        amount: data.order.amount, 
+        currency: "INR", 
+        name: "Cravit", 
+        description: "Food Order", 
+        image: "/cravit-logo.jpg", 
+        order_id: data.order.id,
+        handler: async function (response) { 
+            showToast("Order Placed Successfully!", "success");
+            router.push("/user/dashboard"); 
+        },
         theme: { color: "#F97316" },
         modal: { ondismiss: function() { router.push("/user/dashboard"); } }
       };
       const rzp1 = new window.Razorpay(options);
       rzp1.open();
-    } catch (err) { alert(err.message); setIsCheckingOut(false); if(cartItems.length>0) router.refresh(); }
+    } catch (err) { 
+        showToast(err.message || "Checkout Failed", "error"); 
+        setIsCheckingOut(false); 
+        if(cartItems.length > 0) router.refresh(); 
+    }
   };
 
   if (isLoading) return <div className="min-h-screen flex justify-center items-center bg-white dark:bg-gray-950"><Loader2 className="w-8 h-8 animate-spin text-orange-500"/></div>;
   
-  if (error) return <div className="min-h-screen flex justify-center items-center text-red-500 bg-white dark:bg-gray-950"><p>{error}</p></div>;
+  if (error) return <div className="min-h-screen flex flex-col justify-center items-center text-center p-4 bg-white dark:bg-gray-950"><AlertTriangle size={32} className="text-red-500 mb-2"/><p className="text-gray-500">{error}</p></div>;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-32 sm:pb-20 relative">
@@ -268,14 +339,14 @@ export default function CartPage() {
                     key={item._id}
                     item={item}
                     onUpdate={handleUpdateQuantity}
-                    onRemove={handleRemoveItem}
+                    onRequestRemove={requestRemoveItem}
                     onServiceChange={handleServiceChange}
                     isUpdating={isUpdating}
                   />
                 ))}
               </AnimatePresence>
 
-              {/* Mobile: Bill Details inside the scroll flow */}
+              {/* Mobile: Bill Details */}
               <div className="lg:hidden mt-6 bg-white dark:bg-gray-900 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-800">
                  <h2 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                     <Receipt size={16}/> Bill Details
@@ -290,7 +361,7 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* Desktop: Sticky Sidebar (Hidden on Mobile) */}
+            {/* Desktop: Sticky Sidebar */}
             <div className="hidden lg:block w-[380px] sticky top-24 h-fit">
               <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-6">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><Receipt size={18}/> Bill Details</h2>
@@ -327,7 +398,7 @@ export default function CartPage() {
           <motion.div 
             initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }}
             className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-4 px-5 lg:hidden z-30 pb-safe"
-            style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }} // Handle iPhone Home Bar
+            style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }} 
           >
             <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto">
               <div className="flex flex-col">
@@ -346,6 +417,53 @@ export default function CartPage() {
             </div>
           </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* --- DELETE CONFIRMATION MODAL --- */}
+      <AnimatePresence>
+        {itemToDelete && (
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                <motion.div 
+                    initial={{ scale: 0.9, opacity: 0 }} 
+                    animate={{ scale: 1, opacity: 1 }} 
+                    exit={{ scale: 0.9, opacity: 0 }}
+                    className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-xs w-full p-6 text-center border border-gray-100 dark:border-gray-800"
+                >
+                    <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
+                        <Trash2 size={24} />
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Remove Item?</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                        Are you sure you want to remove this item from your cart?
+                    </p>
+                    <div className="flex gap-3">
+                        <button 
+                            onClick={() => setItemToDelete(null)}
+                            className="flex-1 py-2.5 rounded-xl font-bold text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            onClick={confirmRemoveItem}
+                            className="flex-1 py-2.5 rounded-xl font-bold text-sm bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/30 transition-all active:scale-95"
+                        >
+                            Remove
+                        </button>
+                    </div>
+                </motion.div>
+            </div>
+        )}
+      </AnimatePresence>
+
+      {/* --- CUSTOM TOAST --- */}
+      <AnimatePresence>
+          {toast && (
+              <Toast 
+                  message={toast.message} 
+                  type={toast.type} 
+                  onClose={() => setToast(null)} 
+              />
+          )}
       </AnimatePresence>
 
     </div>
