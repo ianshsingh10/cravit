@@ -153,7 +153,6 @@ const MobileMenu = ({ user, isOpen, onClose, onSignOut, cartCount, sellers, isLo
               )}
             </div>
 
-            {/* 2. Scrollable Menu Content */}
             <div className="flex-1 overflow-y-auto px-6 space-y-6 pb-6">
               {user && (
                 <>
@@ -174,7 +173,6 @@ const MobileMenu = ({ user, isOpen, onClose, onSignOut, cartCount, sellers, isLo
                     <MenuItem href="/user/profile" onClick={onClose} icon={UserCog} label="Profile Settings" />
                   </div>
 
-                  {/* Restaurant Accordion - ONLY FOR USERS */}
                   {user.role === 'user' && (
                     <div className="space-y-3">
                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Food</p>
@@ -225,7 +223,6 @@ const MobileMenu = ({ user, isOpen, onClose, onSignOut, cartCount, sellers, isLo
               )}
             </div>
 
-            {/* 3. Footer: Sign Out (Clean, No Box) */}
             {user && (
               <div className="p-6 border-t border-gray-100 dark:border-gray-800 mt-auto">
                 <button 
@@ -244,7 +241,6 @@ const MobileMenu = ({ user, isOpen, onClose, onSignOut, cartCount, sellers, isLo
   );
 };
 
-// --- DESKTOP DROPDOWN ---
 
 const DesktopProfileMenu = ({ user, onSignOut }) => {
   const [isOpen, setIsOpen] = useState(false);
