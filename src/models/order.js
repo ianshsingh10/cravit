@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { Pay } from 'twilio/lib/twiml/VoiceResponse';
 
 const statusHistorySchema = new mongoose.Schema({
     status: { type: String, required: true },

@@ -18,8 +18,8 @@ export async function POST(req) {
     await dbConnect();
 
     try {
-        // ✅ Ensure user is logged in
-        const token = cookies().get("token")?.value;
+        const cookie = await cookies();
+        const token = cookie.get("token")?.value;
         if (!token) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
@@ -48,7 +48,6 @@ export async function POST(req) {
             .services(TWILIO_VERIFY_SERVICE_SID)
             .verificationChecks.create({ to: phoneNo, code: otp });
 
-        console.log("✅ Twilio verification check:", check);
 
         if (check.status === "approved") {
             const updatedUser = await User.findByIdAndUpdate(

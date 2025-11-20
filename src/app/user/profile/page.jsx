@@ -1,4 +1,3 @@
-// profile/page.jsx
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -10,14 +9,17 @@ import Image from 'next/image';
 export default function EditProfilePage() {
     const [form, setForm] = useState({ name: "", phoneNo: "" });
     const [user, setUser] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false); // For profile save
     const [isAuthLoading, setIsAuthLoading] = useState(true);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    
+    // OTP States
     const [otpSent, setOtpSent] = useState(false);
     const [otp, setOtp] = useState("");
     const [sendingOtp, setSendingOtp] = useState(false);
     const [verifyingOtp, setVerifyingOtp] = useState(false);
+    
     const router = useRouter();
 
     useEffect(() => {
@@ -49,7 +51,6 @@ export default function EditProfilePage() {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    // Save name only
     const handleSaveProfile = async (e) => {
         e.preventDefault();
         setIsLoading(true);
@@ -63,7 +64,6 @@ export default function EditProfilePage() {
             const result = await res.json();
             if (res.ok) {
                 setSuccess(result.message || 'Profile updated successfully!');
-                // Optional: Refresh router to update header avatar
                 router.refresh();
             } else {
                 setError(result.error || "Failed to update profile.");
@@ -76,18 +76,25 @@ export default function EditProfilePage() {
     };
 
     const handleSendOtp = async () => {
+        if (!form.phoneNo) {
+            setError("Please enter a phone number.");
+            return;
+        }
+        const formattedPhone = form.phoneNo.startsWith("+") 
+        ? form.phoneNo 
+        : `+91${form.phoneNo}`;
         setError(""); setSuccess("");
         setSendingOtp(true);
         try {
             const res = await fetch("/api/user/send-noverify-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phoneNo: form.phoneNo }),
+                body: JSON.stringify({ phoneNo: formattedPhone }),
             });
             const result = await res.json();
             if (res.ok) {
                 setOtpSent(true);
-                setSuccess(result.message || "OTP sent");
+                setSuccess(result.message || "OTP sent successfully.");
             } else {
                 setError(result.error || "Failed to send OTP");
             }
@@ -99,27 +106,29 @@ export default function EditProfilePage() {
     };
 
     const handleVerifyOtp = async () => {
+        if (!otp) {
+            setError("Please enter the OTP.");
+            return;
+        }
+        const formattedPhone = form.phoneNo.startsWith("+") 
+        ? form.phoneNo 
+        : `+91${form.phoneNo}`;
         setError(""); setSuccess("");
         setVerifyingOtp(true);
         try {
             const res = await fetch("/api/user/verify-noupdate-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phoneNo: form.phoneNo, otp }),
+                body: JSON.stringify({ phoneNo: formattedPhone, otp }),
             });
             const result = await res.json();
             if (res.ok) {
                 setSuccess(result.message || "Phone verified.");
                 setOtpSent(false);
                 setOtp("");
-                // If the API returns the updated user, use it to refresh UI
                 if (result.user) {
                     setUser(result.user);
                     setForm({ ...form, phoneNo: result.user.phoneNo || "" });
-                } else {
-                    // fallback: refetch user
-                    const me = await (await fetch("/api/user/me")).json();
-                    if (me.user) setUser(me.user);
                 }
             } else {
                 setError(result.error || "Invalid OTP");
@@ -159,7 +168,6 @@ export default function EditProfilePage() {
                                 user?.name?.charAt(0).toUpperCase() || 'U'
                             )}
                         </div>
-                        {/* Optional: Camera Icon for future image upload feature */}
                         <div className="absolute bottom-0 right-0 bg-white dark:bg-gray-800 p-1.5 rounded-full shadow-md border border-gray-200 dark:border-gray-700 text-gray-500 cursor-not-allowed" title="Change photo coming soon">
                              <Camera size={16} />
                         </div>
@@ -189,8 +197,9 @@ export default function EditProfilePage() {
                     )}
                 </AnimatePresence>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <div>
+                {/* ✅ Corrected: onSubmit handler fixed */}
+                <form onSubmit={handleSaveProfile} className="space-y-5">
+                     <div>
                         <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Email Address</label>
                         <div className="relative group">
                             <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-gray-500 transition-colors" size={18} />
@@ -221,19 +230,65 @@ export default function EditProfilePage() {
 
                     <div>
                          <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Phone Number</label>
-                        <div className="relative">
-                            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                            <input 
-                                name="phoneNo" 
-                                type="tel" 
-                                value={form.phoneNo} 
-                                placeholder="Your Phone Number" 
-                                className="pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl w-full text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all" 
-                                onChange={handleChange} 
-                                required 
-                            />
+                        <div className="relative flex gap-2">
+                             <div className="relative flex-grow">
+                                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                <input 
+                                    name="phoneNo" 
+                                    type="tel" 
+                                    value={form.phoneNo} 
+                                    placeholder="Your Phone Number" 
+                                    className="pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl w-full text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all" 
+                                    onChange={handleChange} 
+                                    required 
+                                />
+                            </div>
+                            {/* Verify Button for Phone */}
+                            {!otpSent && form.phoneNo !== user?.phoneNo && (
+                                <button
+                                    type="button"
+                                    onClick={handleSendOtp}
+                                    disabled={sendingOtp}
+                                    className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50"
+                                >
+                                    {sendingOtp ? <Loader2 className="w-4 h-4 animate-spin"/> : "Verify"}
+                                </button>
+                            )}
                         </div>
                     </div>
+
+                    {/* OTP Input Field (Only visible after sending OTP) */}
+                    <AnimatePresence>
+                        {otpSent && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="space-y-3 overflow-hidden"
+                            >
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Enter OTP</label>
+                                <div className="flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        value={otp} 
+                                        onChange={(e) => setOtp(e.target.value)} 
+                                        placeholder="123456" 
+                                        className="flex-grow px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-center tracking-widest font-bold text-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none"
+                                        maxLength={6}
+                                    />
+                                    <button 
+                                        type="button" 
+                                        onClick={handleVerifyOtp} 
+                                        disabled={verifyingOtp} 
+                                        className="px-6 py-2 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 disabled:opacity-50"
+                                    >
+                                        {verifyingOtp ? <Loader2 className="w-5 h-5 animate-spin"/> : "Submit"}
+                                    </button>
+                                </div>
+                                <p className="text-xs text-gray-400 text-center">An OTP has been sent to {form.phoneNo}</p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     <button 
                         type="submit" 
