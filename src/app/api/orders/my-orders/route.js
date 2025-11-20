@@ -20,7 +20,7 @@ export async function GET() {
             .sort({ createdAt: -1 }) 
             .populate({
                 path: 'sellerId',
-                select: 'name'
+                select: 'name image' 
             });
 
         return NextResponse.json({ orders });

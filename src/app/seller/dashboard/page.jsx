@@ -1,47 +1,70 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Package, Loader2, PlusCircle, AlertTriangle, CheckCircle, Search } from 'lucide-react';
+import { 
+    Package, Loader2, Plus, AlertTriangle, 
+    CheckCircle2, Search, AlertCircle
+} from 'lucide-react';
+import { motion, AnimatePresence } from "framer-motion";
+
 import { ItemCard, ItemCardSkeleton } from "@/Components/seller/ItemCard";
 import { AddEditItemModal } from "@/Components/seller/AddEditItemModal";
 import { DeleteConfirmationModal } from "@/Components/seller/DeleteConfirmationModal";
 
+// --- Sub-Component: Stats Card ---
+const StatsCard = ({ title, value, icon: Icon, color, borderColor }) => (
+    <div className={`bg-white dark:bg-gray-800 p-4 rounded-2xl border ${borderColor} shadow-sm flex items-center gap-4`}>
+        <div className={`p-3 rounded-xl ${color}`}>
+            <Icon size={20} />
+        </div>
+        <div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{title}</p>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{value}</h3>
+        </div>
+    </div>
+);
+
 export default function SellerDashboard() {
     const [items, setItems] = useState([]);
     const [user, setUser] = useState(null);
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
+    
     const [isLoading, setIsLoading] = useState(false);
     const [isAuthLoading, setIsAuthLoading] = useState(true);
-
+    const [searchQuery, setSearchQuery] = useState("");
+    const [activeTab, setActiveTab] = useState("all");
+    
+    const [notification, setNotification] = useState(null); 
     const [isAddEditModalOpen, setAddEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
+    
     const router = useRouter();
 
-    const [searchQuery, setSearchQuery] = useState("");
+    const showNotification = (type, message) => {
+        setNotification({ type, message });
+        setTimeout(() => setNotification(null), 3000);
+    };
 
     const fetchItems = useCallback(async () => {
         setIsLoading(true);
-        setError("");
         try {
             const res = await fetch('/api/items/my-items');
             if (res.ok) {
                 const data = await res.json();
                 setItems(data.items || []);
             } else {
-                setError("Failed to fetch your items.");
+                showNotification("error", "Failed to fetch items.");
             }
         } catch (err) {
-            setError("An error occurred while fetching items.");
+            showNotification("error", "Connection error.");
         } finally {
             setIsLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        const fetchUserAndItems = async () => {
+        const init = async () => {
             setIsAuthLoading(true);
             try {
                 const res = await fetch("/api/user/me");
@@ -51,178 +74,242 @@ export default function SellerDashboard() {
                         setUser(data.user);
                         await fetchItems();
                     } else {
-                        setError(data.user ? "Access Denied. Only sellers can manage items." : "You must be logged in.");
                         router.push('/user/login');
                     }
                 } else {
-                    setError("Failed to verify user session.");
                     router.push('/user/login');
                 }
             } catch (err) {
-                setError("An error occurred while fetching user data.");
+                console.error(err);
             } finally {
                 setIsAuthLoading(false);
             }
         };
-        fetchUserAndItems();
+        init();
     }, [fetchItems, router]);
 
-    const handleOpenAddModal = () => {
-        setCurrentItem(null);
-        setAddEditModalOpen(true);
-    };
-
-    const handleOpenEditModal = (item) => {
-        setCurrentItem(item);
-        setAddEditModalOpen(true);
-    };
-
-    const handleOpenDeleteModal = (item) => {
-        setCurrentItem(item);
-        setDeleteModalOpen(true);
-    };
-
-    const handleDeleteItem = async () => {
-        if (!currentItem) return;
-        setIsLoading(true);
-        setError("");
-        setSuccess("");
-        try {
-            const res = await fetch('/api/items/delete', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ itemId: currentItem._id }),
-            });
-            const result = await res.json();
-            if (res.ok) {
-                setSuccess(result.message || "Item deleted successfully.");
-                fetchItems();
-            } else {
-                setError(result.error || "Failed to delete item.");
-            }
-        } catch (err) {
-            setError("An error occurred during deletion.");
-        } finally {
-            setIsLoading(false);
-            setDeleteModalOpen(false);
-            setCurrentItem(null);
-        }
-    };
+    // --- HELPER: Define what "Available" means ---
+    // Inverting logic: If your DB has 'isAvailable: false' (or undefined) for active items
+    const isItemActive = (item) => !item.isAvailable; 
 
     const handleToggleAvailability = async (itemToToggle) => {
-        setError("");
-        setSuccess("");
-    
+        const previousItems = [...items];
+        // Optimistic Update
+        setItems(current => current.map(item => 
+            item._id === itemToToggle._id ? { ...item, isAvailable: !item.isAvailable } : item
+        ));
+
         try {
             const res = await fetch(`/api/items/availability`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ itemId: itemToToggle._id }),
             });
-    
+
+            if (!res.ok) throw new Error("Failed");
+            
             const updatedItem = await res.json();
-    
-            if (res.ok) {
-                setItems(currentItems =>
-                    currentItems.map(item =>
-                        item._id === updatedItem._id ? updatedItem : item
-                    )
-                );
-                setSuccess("Item availability updated.");
-                setTimeout(() => setSuccess(""), 3000);
-            } else {
-                setError(updatedItem.error || "Failed to update availability.");
-            }
+            setItems(current => current.map(item => 
+                item._id === updatedItem._id ? updatedItem : item
+            ));
+            
+            // Notification logic using the inverted helper
+            const isActiveNow = isItemActive(updatedItem);
+            showNotification("success", `Item marked as ${isActiveNow ? 'Available' : 'Sold Out'}`);
+
         } catch (err) {
-            setError("An error occurred while updating the item.");
+            setItems(previousItems);
+            showNotification("error", "Failed to update status.");
         }
     };
 
-    const filteredItems = items.filter(item =>
-        item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) || item.category.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // --- Corrected Stats Calculation ---
+    const stats = useMemo(() => {
+        return {
+            total: items.length,
+            // Available = !isAvailable (Active)
+            availableCount: items.filter(i => isItemActive(i)).length, 
+            // Sold Out = isAvailable (Inactive)
+            soldOutCount: items.filter(i => !isItemActive(i)).length 
+        };
+    }, [items]);
+
+    // --- Corrected Filtering ---
+    const filteredItems = useMemo(() => {
+        return items.filter(item => {
+            const matchesSearch = item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                  item.category.toLowerCase().includes(searchQuery.toLowerCase());
+            
+            // Logic flipped here too
+            if (activeTab === 'available') return matchesSearch && isItemActive(item);
+            if (activeTab === 'sold-out') return matchesSearch && !isItemActive(item);
+            
+            return matchesSearch;
+        });
+    }, [items, searchQuery, activeTab]);
+
+    const handleDeleteItem = async () => {
+        if (!currentItem) return;
+        try {
+            const res = await fetch('/api/items/delete', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itemId: currentItem._id }),
+            });
+            if (res.ok) {
+                showNotification("success", "Item deleted successfully.");
+                fetchItems();
+            } else {
+                showNotification("error", "Failed to delete item.");
+            }
+        } catch (err) {
+            showNotification("error", "Error deleting item.");
+        } finally {
+            setDeleteModalOpen(false);
+            setCurrentItem(null);
+        }
+    };
 
     if (isAuthLoading) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex justify-center items-center">
-                <Loader2 className="w-12 h-12 text-orange-500 animate-spin" />
+                <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto">
-                <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-8">
-                    <div className="text-center md:text-left">
-                        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Manage Your Items</h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1">Add, edit, or remove your menu items here.</p>
+        <div className="min-h-screen bg-gray-50/50 dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto space-y-8">
+                
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Seller Dashboard</h1>
+                        <p className="text-gray-500 dark:text-gray-400 mt-1">Manage your menu items.</p>
                     </div>
-                    <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-                        <div className="relative w-full md:w-auto">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                            <input
-                                type="text"
-                                placeholder="Search your items..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            />
-                        </div>
-                        <button onClick={handleOpenAddModal} className="w-full md:w-auto flex-shrink-0 flex items-center justify-center gap-2 bg-orange-500 text-white font-bold py-3 px-5 rounded-full hover:bg-orange-600 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                            <PlusCircle size={20} />
-                            <span>Add New Item</span>
-                        </button>
+                    <button 
+                        onClick={() => { setCurrentItem(null); setAddEditModalOpen(true); }} 
+                        className="flex items-center justify-center gap-2 bg-orange-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-orange-700 transition-all shadow-lg shadow-orange-500/20 active:scale-95"
+                    >
+                        <Plus size={20} strokeWidth={2.5} />
+                        <span>Add Item</span>
+                    </button>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <StatsCard 
+                        title="Total Items" 
+                        value={stats.total} 
+                        icon={Package} 
+                        color="bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+                        borderColor="border-blue-100 dark:border-blue-900/30" 
+                    />
+                    <StatsCard 
+                        title="Available (Ticked)" 
+                        value={stats.availableCount} 
+                        icon={CheckCircle2} 
+                        color="bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400"
+                        borderColor="border-green-100 dark:border-green-900/30"
+                    />
+                    <StatsCard 
+                        title="Sold Out" 
+                        value={stats.soldOutCount} 
+                        icon={AlertCircle} 
+                        color="bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400"
+                        borderColor="border-red-100 dark:border-red-900/30"
+                    />
+                </div>
+
+                {/* Search & Tabs */}
+                <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col lg:flex-row gap-4 justify-between items-center">
+                    <div className="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-xl w-full lg:w-auto">
+                        {['all', 'available', 'sold-out'].map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`flex-1 px-4 py-2 rounded-lg text-sm font-semibold capitalize transition-all ${
+                                    activeTab === tab 
+                                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
+                                    : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                                }`}
+                            >
+                                {tab.replace('-', ' ')}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="relative w-full lg:w-80">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <input 
+                            type="text" 
+                            placeholder="Search items..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                        />
                     </div>
                 </div>
                 
-                {error && <p className="bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-3 rounded-lg mb-4 text-sm flex items-center gap-2"><AlertTriangle size={18}/> {error}</p>}
-                {success && <p className="bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 p-3 rounded-lg mb-4 text-sm flex items-center gap-2"><CheckCircle size={18}/> {success}</p>}
-
+                {/* Content */}
                 {isLoading ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                         {[...Array(8)].map((_, i) => <ItemCardSkeleton key={i} />)}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                         {[...Array(4)].map((_, i) => <ItemCardSkeleton key={i} />)}
                     </div>
                 ) : items.length > 0 ? (
                     filteredItems.length > 0 ? (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {filteredItems.map(item => (
                                 <ItemCard 
                                     key={item._id} 
                                     item={item} 
-                                    onEdit={handleOpenEditModal} 
-                                    onDelete={handleOpenDeleteModal}
+                                    onEdit={(itm) => { setCurrentItem(itm); setAddEditModalOpen(true); }} 
+                                    onDelete={(itm) => { setCurrentItem(itm); setDeleteModalOpen(true); }}
                                     onToggleAvailability={handleToggleAvailability}
                                 />
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-16 bg-white dark:bg-gray-800/50 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
-                            <Search className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto" />
-                            <h3 className="mt-4 text-xl font-medium text-gray-900 dark:text-gray-100">No items match your search</h3>
-                            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Try using a different keyword to find what you're looking for.</p>
+                        <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-gray-900 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-800">
+                            <Search className="w-12 h-12 text-gray-300 mb-4" />
+                            <p className="text-gray-500 font-medium">No items found.</p>
                         </div>
                     )
                 ) : (
-                    <div className="text-center py-16 bg-white dark:bg-gray-800/50 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
-                        <Package className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto" />
-                        <h3 className="mt-4 text-xl font-medium text-gray-900 dark:text-gray-100">No items found</h3>
-                        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">You haven't added any items yet. Click the button to get started!</p>
+                    <div className="flex flex-col items-center justify-center py-24 bg-white dark:bg-gray-900 rounded-3xl shadow-sm">
+                        <div className="w-20 h-20 bg-orange-100 dark:bg-orange-900/20 rounded-full flex items-center justify-center mb-6 text-orange-500">
+                            <Package size={32} />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">No items yet</h3>
+                        <button onClick={() => setAddEditModalOpen(true)} className="text-orange-600 font-bold hover:underline mt-2">Create first item</button>
                     </div>
                 )}
             </div>
+
+            <AnimatePresence>
+                {notification && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
+                        className={`fixed bottom-6 right-6 z-50 px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 font-medium ${
+                            notification.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+                        }`}
+                    >
+                        {notification.type === 'success' ? <CheckCircle2 size={20} /> : <AlertTriangle size={20} />}
+                        {notification.message}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <AddEditItemModal
                 isOpen={isAddEditModalOpen}
                 onClose={() => setAddEditModalOpen(false)}
                 item={currentItem}
                 user={user}
-                onSuccess={() => {
-                    setAddEditModalOpen(false);
-                    fetchItems();
-                    setSuccess(currentItem ? "Item updated successfully!" : "Item added successfully!");
-                }}
-                onError={(err) => setError(err)}
+                onSuccess={() => { setAddEditModalOpen(false); fetchItems(); showNotification("success", currentItem ? "Item updated!" : "Item added!"); }}
+                onError={(err) => showNotification("error", err)}
             />
 
             <DeleteConfirmationModal

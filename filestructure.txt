@@ -1,0 +1,147 @@
+cravit/
+├── filestructure.txt
+├── jsconfig.json
+├── next.config.mjs
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+├── README.md
+├── .gitignore
+├── node_modules/
+├── public/
+│   ├── cravit-logo.jpg
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg11
+│   └── window.svg
+├── src/
+│   ├── app/
+│   │   ├── globals.css
+│   │   ├── layout.jsx
+│   │   ├── page.jsx
+│   │   ├── api/
+│   │   │   ├── auth/
+│   │   │   │   └── [...nextauth]/
+│   │   │   │       └── route.js
+│   │   │   ├── cart/
+│   │   │   │   ├── add/
+│   │   │   │   │   └── route.js
+│   │   │   │   ├── count/
+│   │   │   │   │   └── route.js
+│   │   │   │   ├── remove/
+│   │   │   │   │   └── route.js
+│   │   │   │   ├── reorder/
+│   │   │   │   │   └── route.js
+│   │   │   │   ├── route.js
+│   │   │   │   └── update/
+│   │   │   │       └── route.js
+│   │   │   ├── items/
+│   │   │   │   ├── availability/
+│   │   │   │   │   └── route.js
+│   │   │   │   ├── delete/
+│   │   │   │   │   └── route.js
+│   │   │   │   ├── edit/
+│   │   │   │   │   └── route.js
+│   │   │   │   ├── my-items/
+│   │   │   │   │   └── route.js
+│   │   │   │   ├── route.js
+│   │   │   │   └── upload/
+│   │   │   │       └── route.js
+│   │   │   ├── orders/
+│   │   │   │   ├── cancel/
+│   │   │   │   │   └── route.js
+│   │   │   │   ├── create/
+│   │   │   │   │   └── route.js
+│   │   │   │   ├── my-orders/
+│   │   │   │   │   └── route.js
+│   │   │   │   ├── seller/
+│   │   │   │   │   └── route.js
+│   │   │   │   └── update-status/
+│   │   │   │       └── route.js
+│   │   │   ├── seller/
+│   │   │   │   ├── [slug]/
+│   │   │   │   │   └── items/
+│   │   │   │   │       └── route.js
+│   │   │   │   └── route.js
+│   │   │   └── user/
+│   │   │       ├── check-account-type/
+│   │   │       │   └── route.js
+│   │   │       ├── logout/
+│   │   │       │   └── route.js
+│   │   │       ├── me/
+│   │   │       │   └── route.js
+│   │   │       ├── migrate-passwords/
+│   │   │       │   └── route.js
+│   │   │       ├── send-login-otp/
+│   │   │       │   └── route.js
+│   │   │       ├── send-register-otp/
+│   │   │       │   └── route.js
+│   │   │       ├── update-profile/
+│   │   │       │   └── route.js
+│   │   │       ├── verify-login-otp/
+│   │   │       │   └── route.js
+│   │   │       └── verify-register-otp/
+│   │   │           └── route.js
+│   │   ├── cart/
+│   │   │   └── page.jsx
+│   │   ├── seller/
+│   │   │   ├── [slug]/
+│   │   │   │   └── page.jsx
+│   │   │   ├── dashboard/
+│   │   │   │   └── page.jsx
+│   │   │   └── orders/
+│   │   │       └── page.jsx
+│   │   └── user/
+│   │       ├── dashboard/
+│   │       │   └── page.jsx
+│   │       ├── login/
+│   │       │   └── page.jsx
+│   │       ├── profile/
+│   │       │   └── page.jsx
+│   │       └── register/
+│   │           └── page.jsx
+│   ├── Components/
+│   │   ├── seller/
+│   │   │   ├── AddEditItemModal.jsx
+│   │   │   ├── DeleteConfirmationModal.jsx
+│   │   │   └── ItemCard.jsx
+│   │   ├── shared/
+│   │   │   ├── Footer.jsx
+│   │   │   ├── Navbar.jsx
+│   │   │   └── Provider.jsx
+│   │   ├── stores/
+│   │   │   ├── cartStore.jsx
+│   │   │   └── useUser.jsx
+│   │   ├── ui/
+│   │   │   ├── DashboardCard.jsx
+│   │   │   ├── FeaturedSection.jsx
+│   │   │   ├── HeroSection.jsx
+│   │   │   ├── Modal.jsx
+│   │   │   ├── OutletSection.jsx
+│   │   │   └── TestimonialsSection.jsx
+│   │   └── user/
+│   │       ├── MenuItemCard.jsx
+│   │       ├── orders/
+│   │       │   ├── OrderDetailsModal.jsx
+│   │       │   ├── OrderHistoryCard.jsx
+│   │       │   ├── OrderSkeleton.jsx
+│   │       │   └── StatusIndicator.jsx
+│   │       ├── ProfileCard.jsx
+│   │       └── ReviewsCard.jsx
+│   ├── json/
+│   │   └── bistro.json
+│   ├── lib/
+│   │   ├── cloudinary.js
+│   │   ├── dbConnect.js
+│   │   ├── migrateUsers.js
+│   │   ├── restaurantData.js
+│   │   └── sendEmailOTP.js
+│   └── models/
+│       ├── cart.js
+│       ├── counter.js
+│       ├── items.js
+│       ├── order.js
+│       ├── otp.js
+│       ├── seller.js
+│       └── user.js
