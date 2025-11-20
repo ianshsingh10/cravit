@@ -53,7 +53,7 @@ const handler = NextAuth({
 
         return true;
       } catch (err) {
-        console.error("❌ Google Sign-In error:", err);
+        console.error("Google Sign-In error:", err);
         return false;
       }
     },
@@ -64,10 +64,10 @@ const handler = NextAuth({
   },
   events: {
     async signIn(message) {
-      console.log("✅ signIn event:", message);
+      console.log("signIn event:", message);
     },
     async signInError(error) {
-      console.error("❌ signInError event:", error);
+      console.error("signInError event:", error);
     },
   },
 });
